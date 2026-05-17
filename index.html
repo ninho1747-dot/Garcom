@@ -150,6 +150,20 @@ color:white;
 margin-top:10px;
 }
 
+.btn-entregue{
+background:#16a34a;
+color:white;
+width:100%;
+margin-top:15px;
+}
+
+.btn-print{
+background:#2563eb;
+color:white;
+width:100%;
+margin-top:10px;
+}
+
 .menu-grid{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
@@ -234,6 +248,35 @@ display:inline-block;
 margin-top:10px;
 }
 
+.admin-pedido{
+background:#111827;
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+}
+
+.admin-pedido h3{
+margin-bottom:10px;
+color:#4ade80;
+}
+
+.status{
+padding:6px 12px;
+border-radius:10px;
+display:inline-block;
+font-size:13px;
+margin-top:10px;
+font-weight:700;
+}
+
+.pendente{
+background:#dc2626;
+}
+
+.entregue{
+background:#16a34a;
+}
+
 @media(max-width:900px){
 
 .grid{
@@ -277,6 +320,7 @@ onclick="abrirAba('qr', this)">
 </div>
 
 <!-- GARÇOM -->
+
 <div id="garcom" class="tab-content active">
 
 <div class="grid">
@@ -298,7 +342,7 @@ Total: R$ 0,00
 
 <button class="btn-primary"
 onclick="baixarNotaFiscal()">
-🧾 Baixar Nota Fiscal
+🧾 Imprimir Nota Fiscal
 </button>
 
 </div>
@@ -317,7 +361,12 @@ id="menuGrid"></div>
 </div>
 
 <!-- ADMIN -->
+
 <div id="admin" class="tab-content">
+
+<div class="grid">
+
+<div>
 
 <div class="card">
 
@@ -354,7 +403,24 @@ onclick="adicionarItem()">
 
 </div>
 
+<div>
+
+<div class="card">
+
+<h2>📦 Pedidos Recebidos</h2>
+
+<div id="listaPedidosAdmin"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 <!-- CLIENTE -->
+
 <div id="cliente" class="tab-content">
 
 <div class="card">
@@ -399,6 +465,7 @@ onclick="enviarPedidoCliente()">
 </div>
 
 <!-- QR -->
+
 <div id="qr" class="tab-content">
 
 <div class="card">
@@ -438,7 +505,9 @@ collection,
 addDoc,
 getDocs,
 deleteDoc,
-doc
+doc,
+updateDoc,
+onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -594,18 +663,6 @@ function renderizarCardapio(){
 const menuGrid =
 document.getElementById("menuGrid");
 
-if(cardapio.length === 0){
-
-menuGrid.innerHTML = `
-<div class="empty">
-Nenhum produto cadastrado
-</div>
-`;
-
-return;
-
-}
-
 menuGrid.innerHTML = "";
 
 cardapio.forEach(item=>{
@@ -697,7 +754,7 @@ Adicionar ao Pedido
 
 }
 
-/* REMOVER */
+/* REMOVER PRODUTO */
 
 window.removerProduto = async function(id){
 
@@ -731,21 +788,6 @@ function renderizarPedido(){
 const pedidoDiv =
 document.getElementById("pedido");
 
-if(pedido.length === 0){
-
-pedidoDiv.innerHTML = `
-<div class="empty">
-Nenhum item
-</div>
-`;
-
-document.getElementById("total")
-.innerHTML = "Total: R$ 0,00";
-
-return;
-
-}
-
 pedidoDiv.innerHTML = "";
 
 let total = 0;
@@ -760,9 +802,7 @@ pedidoDiv.innerHTML += `
 
 <div>${item.nome}</div>
 
-<div>
-R$ ${item.preco.toFixed(2)}
-</div>
+<div>R$ ${item.preco.toFixed(2)}</div>
 
 </div>
 
@@ -794,21 +834,6 @@ function renderizarPedidoCliente(){
 const pedidoDiv =
 document.getElementById("pedidoCliente");
 
-if(pedidoCliente.length === 0){
-
-pedidoDiv.innerHTML = `
-<div class="empty">
-Nenhum item adicionado
-</div>
-`;
-
-document.getElementById("totalCliente")
-.innerHTML = "Total: R$ 0,00";
-
-return;
-
-}
-
 pedidoDiv.innerHTML = "";
 
 let total = 0;
@@ -821,13 +846,9 @@ pedidoDiv.innerHTML += `
 
 <div class="order-item">
 
-<div>
-${item.nome}
-</div>
+<div>${item.nome}</div>
 
-<div>
-R$ ${item.preco.toFixed(2)}
-</div>
+<div>R$ ${item.preco.toFixed(2)}</div>
 
 </div>
 
@@ -883,26 +904,151 @@ renderizarPedidoCliente();
 
 }
 
-/* PDF */
+/* PEDIDOS ADMIN */
+
+function carregarPedidosAdmin(){
+
+const pedidosRef =
+collection(db, "pedidos");
+
+onSnapshot(pedidosRef, (snapshot)=>{
+
+const lista =
+document.getElementById("listaPedidosAdmin");
+
+lista.innerHTML = "";
+
+snapshot.forEach((docItem)=>{
+
+const pedido = docItem.data();
+
+let itensHTML = "";
+
+pedido.itens.forEach(item=>{
+
+itensHTML += `
+<div class="order-item">
+<div>${item.nome}</div>
+<div>R$ ${item.preco.toFixed(2)}</div>
+</div>
+`;
+
+});
+
+lista.innerHTML += `
+
+<div class="admin-pedido">
+
+<h3>
+🍽️ Mesa ${pedido.mesa}
+</h3>
+
+${itensHTML}
+
+<div class="total">
+R$ ${pedido.total.toFixed(2)}
+</div>
+
+<div class="status ${pedido.status}">
+${pedido.status.toUpperCase()}
+</div>
+
+<button
+class="btn-entregue"
+onclick="marcarEntregue('${docItem.id}')">
+✅ Marcar Entregue
+</button>
+
+<button
+class="btn-print"
+onclick="imprimirPedido(
+'${pedido.mesa}',
+'${pedido.total}',
+'${pedido.status}'
+)">
+🖨️ Imprimir Pedido
+</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+/* ENTREGUE */
+
+window.marcarEntregue = async function(id){
+
+await updateDoc(
+doc(db, "pedidos", id),
+{
+status:"entregue"
+}
+);
+
+}
+
+/* IMPRIMIR PEDIDO */
+
+window.imprimirPedido = function(mesa,total,status){
+
+const janela =
+window.open("", "", "width=400,height=600");
+
+janela.document.write(`
+
+<html>
+
+<head>
+
+<title>Pedido Mesa ${mesa}</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Pedido Mesa ${mesa}</h1>
+
+<p>Status: ${status}</p>
+
+<p>Total: R$ ${parseFloat(total).toFixed(2)}</p>
+
+<p>Impresso em:
+${new Date().toLocaleString()}</p>
+
+<script>
+window.print();
+</script>
+
+</body>
+
+</html>
+
+`);
+
+janela.document.close();
+
+}
+
+/* NOTA FISCAL */
 
 window.baixarNotaFiscal = function(){
 
 const mesa =
 document.getElementById("mesa").value;
-
-if(!mesa){
-
-alert("Informe a mesa!");
-return;
-
-}
-
-if(pedido.length === 0){
-
-alert("Nenhum item!");
-return;
-
-}
 
 const docPDF = new jsPDF();
 
@@ -910,22 +1056,13 @@ docPDF.setFontSize(20);
 
 docPDF.text("NOTA FISCAL", 65, 20);
 
-docPDF.setFontSize(12);
-
 docPDF.text(
 "Mesa: " + mesa,
 20,
 40
 );
 
-docPDF.text(
-"Data: " +
-new Date().toLocaleDateString(),
-20,
-50
-);
-
-let y = 70;
+let y = 60;
 
 let total = 0;
 
@@ -945,8 +1082,6 @@ total += item.preco;
 
 });
 
-docPDF.setFontSize(16);
-
 docPDF.text(
 "TOTAL: R$ " +
 total.toFixed(2),
@@ -954,9 +1089,9 @@ total.toFixed(2),
 y + 20
 );
 
-docPDF.save(
-"nota-fiscal-mesa-"+mesa+".pdf"
-);
+docPDF.autoPrint();
+
+window.open(docPDF.output('bloburl'));
 
 }
 
@@ -972,15 +1107,6 @@ document.getElementById("quantidadeMesas").value
 const qrGrid =
 document.getElementById("qrGrid");
 
-if(!quantidade){
-
-alert("Informe a quantidade!");
-return;
-
-}
-
-qrGrid.innerHTML = "";
-
 const cardapioURL =
 window.location.origin +
 window.location.pathname +
@@ -988,11 +1114,19 @@ window.location.pathname +
 
 for(let i=1;i<=quantidade;i++){
 
+const qrExistente =
+document.getElementById("qrMesa"+i);
+
+if(qrExistente){
+continue;
+}
+
 const qrId = "qrMesa"+i;
 
 qrGrid.innerHTML += `
 
-<div class="qr-card">
+<div class="qr-card"
+id="cardMesa${i}">
 
 <h3>
 🍽️ Mesa ${i}
@@ -1006,6 +1140,12 @@ class="qrcode">
 <p style="margin-top:10px;">
 Escaneie para abrir o cardápio
 </p>
+
+<button
+class="btn-print"
+onclick="imprimirQRCode(${i})">
+🖨️ Imprimir QR Code
+</button>
 
 </div>
 
@@ -1024,11 +1164,70 @@ height:180
 
 }
 
+/* IMPRIMIR QR */
+
+window.imprimirQRCode = function(mesa){
+
+const conteudo =
+document.getElementById(
+"cardMesa"+mesa
+).innerHTML;
+
+const janela =
+window.open("", "", "width=500,height=700");
+
+janela.document.write(`
+
+<html>
+
+<head>
+
+<title>QR Mesa ${mesa}</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+padding:30px;
+}
+
+button{
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Mesa ${mesa}</h1>
+
+${conteudo}
+
+<script>
+window.print();
+</script>
+
+</body>
+
+</html>
+
+`);
+
+janela.document.close();
+
+}
+
 /* INICIAR */
 
 carregarProdutos();
 
+carregarPedidosAdmin();
+
 renderizarPedido();
+
 renderizarPedidoCliente();
 
 /* MODO CLIENTE */
@@ -1044,10 +1243,9 @@ params.get("mesa");
 
 if(mesaURL){
 
-const mesaInfo =
-document.getElementById("mesaClienteInfo");
-
-mesaInfo.innerHTML =
+document.getElementById(
+"mesaClienteInfo"
+).innerHTML =
 "🍽️ Você está na Mesa " + mesaURL;
 
 }
