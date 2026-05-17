@@ -220,12 +220,6 @@ text-align:right;
 color:#4ade80;
 }
 
-.empty{
-padding:30px;
-text-align:center;
-opacity:0.6;
-}
-
 .qr-grid{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
@@ -253,11 +247,6 @@ background:#111827;
 padding:20px;
 border-radius:18px;
 margin-bottom:20px;
-}
-
-.admin-pedido h3{
-margin-bottom:10px;
-color:#4ade80;
 }
 
 .status{
@@ -494,8 +483,6 @@ id="qrGrid"></div>
 
 <script type="module">
 
-/* FIREBASE */
-
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -514,23 +501,16 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig = {
 
 apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
-
 authDomain: "garcompro-bd3b3.firebaseapp.com",
-
 projectId: "garcompro-bd3b3",
-
 storageBucket: "garcompro-bd3b3.firebasestorage.app",
-
 messagingSenderId: "311775314838",
-
 appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
 
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
-
 const { jsPDF } = window.jspdf;
 
 let cardapio = [];
@@ -570,10 +550,8 @@ cardapio = [];
 querySnapshot.forEach((docItem)=>{
 
 cardapio.push({
-
 firebaseId: docItem.id,
 ...docItem.data()
-
 });
 
 });
@@ -656,7 +634,7 @@ document.getElementById("imagem").value = "";
 
 }
 
-/* CARDÁPIO GARÇOM */
+/* CARDÁPIO */
 
 function renderizarCardapio(){
 
@@ -707,9 +685,11 @@ onclick="removerProduto('${item.firebaseId}')">
 
 });
 
+renderizarCliente();
+
 }
 
-/* CARDÁPIO CLIENTE */
+/* CLIENTE */
 
 function renderizarCliente(){
 
@@ -754,7 +734,7 @@ Adicionar ao Pedido
 
 }
 
-/* REMOVER PRODUTO */
+/* REMOVER */
 
 window.removerProduto = async function(id){
 
@@ -862,7 +842,7 @@ document.getElementById("totalCliente")
 
 }
 
-/* ENVIAR PEDIDO CLIENTE */
+/* ENVIAR PEDIDO */
 
 window.enviarPedidoCliente = async function(){
 
@@ -896,7 +876,7 @@ data:new Date().toLocaleString()
 }
 );
 
-alert("Pedido enviado para cozinha!");
+alert("Pedido enviado!");
 
 pedidoCliente = [];
 
@@ -959,16 +939,6 @@ onclick="marcarEntregue('${docItem.id}')">
 ✅ Marcar Entregue
 </button>
 
-<button
-class="btn-print"
-onclick="imprimirPedido(
-'${pedido.mesa}',
-'${pedido.total}',
-'${pedido.status}'
-)">
-🖨️ Imprimir Pedido
-</button>
-
 </div>
 
 `;
@@ -989,57 +959,6 @@ doc(db, "pedidos", id),
 status:"entregue"
 }
 );
-
-}
-
-/* IMPRIMIR PEDIDO */
-
-window.imprimirPedido = function(mesa,total,status){
-
-const janela =
-window.open("", "", "width=400,height=600");
-
-janela.document.write(`
-
-<html>
-
-<head>
-
-<title>Pedido Mesa ${mesa}</title>
-
-<style>
-
-body{
-font-family:Arial;
-padding:20px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>Pedido Mesa ${mesa}</h1>
-
-<p>Status: ${status}</p>
-
-<p>Total: R$ ${parseFloat(total).toFixed(2)}</p>
-
-<p>Impresso em:
-${new Date().toLocaleString()}</p>
-
-<script>
-window.print();
-</script>
-
-</body>
-
-</html>
-
-`);
-
-janela.document.close();
 
 }
 
@@ -1088,8 +1007,6 @@ total.toFixed(2),
 20,
 y + 20
 );
-
-docPDF.autoPrint();
 
 window.open(docPDF.output('bloburl'));
 
@@ -1164,17 +1081,18 @@ height:180
 
 }
 
-/* IMPRIMIR QR */
+/* IMPRIMIR QR CORRIGIDO */
 
 window.imprimirQRCode = function(mesa){
 
-const conteudo =
-document.getElementById(
-"cardMesa"+mesa
-).innerHTML;
+const qrElemento =
+document.getElementById("cardMesa"+mesa);
+
+const qrImagem =
+qrElemento.querySelector("img");
 
 const janela =
-window.open("", "", "width=500,height=700");
+window.open("", "_blank", "width=500,height=700");
 
 janela.document.write(`
 
@@ -1192,8 +1110,20 @@ text-align:center;
 padding:30px;
 }
 
+img{
+width:220px;
+height:220px;
+}
+
 button{
-display:none;
+padding:12px 20px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-size:16px;
+cursor:pointer;
+margin-top:20px;
 }
 
 </style>
@@ -1202,13 +1132,17 @@ display:none;
 
 <body>
 
-<h1>Mesa ${mesa}</h1>
+<h1>🍽️ Mesa ${mesa}</h1>
 
-${conteudo}
+<img src="${qrImagem.src}">
 
-<script>
-window.print();
-</script>
+<p style="margin-top:20px;">
+Escaneie para abrir o cardápio
+</p>
+
+<button onclick="window.print()">
+🖨️ Imprimir
+</button>
 
 </body>
 
@@ -1223,11 +1157,8 @@ janela.document.close();
 /* INICIAR */
 
 carregarProdutos();
-
 carregarPedidosAdmin();
-
 renderizarPedido();
-
 renderizarPedidoCliente();
 
 /* MODO CLIENTE */
