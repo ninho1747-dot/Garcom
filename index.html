@@ -802,7 +802,53 @@ window.adicionarPedidoCliente = function(id){
 const item =
 cardapio.find(i=>i.firebaseId === id);
 
-pedidoCliente.push(item);
+const existente =
+pedidoCliente.find(i=>i.firebaseId === id);
+
+if(existente){
+
+existente.quantidade += 1;
+
+}else{
+
+pedidoCliente.push({
+...item,
+quantidade:1
+});
+
+}
+
+renderizarPedidoCliente();
+
+}
+
+window.aumentarQuantidade = function(index){
+
+pedidoCliente[index].quantidade += 1;
+
+renderizarPedidoCliente();
+
+}
+
+window.diminuirQuantidade = function(index){
+
+if(pedidoCliente[index].quantidade > 1){
+
+pedidoCliente[index].quantidade -= 1;
+
+}else{
+
+pedidoCliente.splice(index,1);
+
+}
+
+renderizarPedidoCliente();
+
+}
+
+window.removerItemCliente = function(index){
+
+pedidoCliente.splice(index,1);
 
 renderizarPedidoCliente();
 
@@ -817,17 +863,76 @@ pedidoDiv.innerHTML = "";
 
 let total = 0;
 
-pedidoCliente.forEach(item=>{
+pedidoCliente.forEach((item,index)=>{
 
-total += item.preco;
+const subtotal =
+item.preco * item.quantidade;
+
+total += subtotal;
 
 pedidoDiv.innerHTML += `
 
-<div class="order-item">
+<div class="order-item"
+style="
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
+">
 
-<div>${item.nome}</div>
+<div style="
+width:100%;
+display:flex;
+justify-content:space-between;
+">
 
-<div>R$ ${item.preco.toFixed(2)}</div>
+<div>
+${item.nome}
+</div>
+
+<div>
+R$ ${subtotal.toFixed(2)}
+</div>
+
+</div>
+
+<div style="
+display:flex;
+gap:10px;
+width:100%;
+">
+
+<button
+class="btn-remove"
+style="width:50px;"
+onclick="diminuirQuantidade(${index})">
+-
+</button>
+
+<div style="
+flex:1;
+background:#1e293b;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+">
+${item.quantidade}
+</div>
+
+<button
+class="btn-add"
+onclick="aumentarQuantidade(${index})">
++
+</button>
+
+<button
+class="btn-remove"
+onclick="removerItemCliente(${index})">
+🗑️
+</button>
+
+</div>
 
 </div>
 
@@ -861,7 +966,9 @@ params.get("mesa") || "Sem Mesa";
 let total = 0;
 
 pedidoCliente.forEach(item=>{
-total += item.preco;
+
+total += item.preco * item.quantidade;
+
 });
 
 await addDoc(
@@ -905,10 +1012,17 @@ let itensHTML = "";
 
 pedido.itens.forEach(item=>{
 
+const subtotal =
+item.preco * item.quantidade;
+
 itensHTML += `
 <div class="order-item">
-<div>${item.nome}</div>
-<div>R$ ${item.preco.toFixed(2)}</div>
+<div>
+${item.nome} x${item.quantidade}
+</div>
+<div>
+R$ ${subtotal.toFixed(2)}
+</div>
 </div>
 `;
 
@@ -988,8 +1102,11 @@ onclick="apagarPedido('${docItem.id}')">
 
 window.marcarEntregue = async function(id){
 
+const pedidoRef =
+doc(db, "pedidos", id);
+
 await updateDoc(
-doc(db, "pedidos", id),
+pedidoRef,
 {
 status:"entregue"
 }
@@ -1001,8 +1118,11 @@ status:"entregue"
 
 window.marcarPendente = async function(id){
 
+const pedidoRef =
+doc(db, "pedidos", id);
+
 await updateDoc(
-doc(db, "pedidos", id),
+pedidoRef,
 {
 status:"pendente"
 }
