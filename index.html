@@ -138,7 +138,6 @@ color:white;
 }
 
 .btn-remove{
-width:50px;
 background:#dc2626;
 color:white;
 }
@@ -734,11 +733,11 @@ Adicionar ao Pedido
 
 }
 
-/* REMOVER */
+/* REMOVER PRODUTO */
 
 window.removerProduto = async function(id){
 
-if(confirm("Deseja remover?")){
+if(confirm("Deseja remover este produto?")){
 
 await deleteDoc(
 doc(db, "produtos", id)
@@ -876,7 +875,7 @@ data:new Date().toLocaleString()
 }
 );
 
-alert("Pedido enviado!");
+alert("Pedido enviado para cozinha!");
 
 pedidoCliente = [];
 
@@ -933,11 +932,47 @@ R$ ${pedido.total.toFixed(2)}
 ${pedido.status.toUpperCase()}
 </div>
 
+${
+pedido.status === "pendente"
+?
+`
 <button
 class="btn-entregue"
 onclick="marcarEntregue('${docItem.id}')">
 ✅ Marcar Entregue
 </button>
+`
+:
+`
+<button
+class="btn-primary"
+style="
+background:#f59e0b;
+margin-top:15px;
+"
+onclick="marcarPendente('${docItem.id}')">
+↩️ Voltar para Pendente
+</button>
+`
+}
+
+${
+pedido.status === "entregue"
+?
+`
+<button
+class="btn-remove"
+style="
+width:100%;
+margin-top:10px;
+"
+onclick="apagarPedido('${docItem.id}')">
+🗑️ Excluir Pedido
+</button>
+`
+:
+""
+}
 
 </div>
 
@@ -949,7 +984,7 @@ onclick="marcarEntregue('${docItem.id}')">
 
 }
 
-/* ENTREGUE */
+/* MARCAR ENTREGUE */
 
 window.marcarEntregue = async function(id){
 
@@ -959,6 +994,38 @@ doc(db, "pedidos", id),
 status:"entregue"
 }
 );
+
+}
+
+/* VOLTAR PARA PENDENTE */
+
+window.marcarPendente = async function(id){
+
+await updateDoc(
+doc(db, "pedidos", id),
+{
+status:"pendente"
+}
+);
+
+}
+
+/* EXCLUIR PEDIDO */
+
+window.apagarPedido = async function(id){
+
+const confirmar =
+confirm("Deseja excluir este pedido?");
+
+if(!confirmar){
+return;
+}
+
+await deleteDoc(
+doc(db, "pedidos", id)
+);
+
+alert("Pedido excluído!");
 
 }
 
@@ -1081,7 +1148,7 @@ height:180
 
 }
 
-/* IMPRIMIR QR CORRIGIDO */
+/* IMPRIMIR QR */
 
 window.imprimirQRCode = function(mesa){
 
