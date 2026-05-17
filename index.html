@@ -131,6 +131,25 @@ color:white;
 margin-top:10px;
 }
 
+.btn-add{
+flex:1;
+background:#2563eb;
+color:white;
+}
+
+.btn-remove{
+width:50px;
+background:#dc2626;
+color:white;
+}
+
+.btn-cliente{
+width:100%;
+background:#16a34a;
+color:white;
+margin-top:10px;
+}
+
 .menu-grid{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
@@ -168,18 +187,6 @@ font-size:14px;
 .actions{
 display:flex;
 gap:10px;
-}
-
-.btn-add{
-flex:1;
-background:#2563eb;
-color:white;
-}
-
-.btn-remove{
-width:50px;
-background:#dc2626;
-color:white;
 }
 
 .order-item{
@@ -354,8 +361,38 @@ onclick="adicionarItem()">
 
 <h2>📱 Cardápio Digital</h2>
 
+<div
+id="mesaClienteInfo"
+style="
+margin-bottom:20px;
+background:#334155;
+padding:15px;
+border-radius:14px;
+font-weight:600;
+text-align:center;
+">
+</div>
+
 <div class="menu-grid"
 id="clienteMenu"></div>
+
+<h2 style="margin-top:30px;">
+🛒 Meu Pedido
+</h2>
+
+<div id="pedidoCliente"></div>
+
+<div
+class="total"
+id="totalCliente">
+Total: R$ 0,00
+</div>
+
+<button
+class="btn-primary"
+onclick="enviarPedidoCliente()">
+📤 Enviar Pedido
+</button>
 
 </div>
 
@@ -425,14 +462,11 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
-/* PDF */
-
 const { jsPDF } = window.jspdf;
-
-/* DADOS */
 
 let cardapio = [];
 let pedido = [];
+let pedidoCliente = [];
 
 /* ABAS */
 
@@ -542,7 +576,7 @@ reader.readAsDataURL(arquivo);
 
 }
 
-/* LIMPAR FORM */
+/* LIMPAR */
 
 function limparFormulario(){
 
@@ -553,7 +587,7 @@ document.getElementById("imagem").value = "";
 
 }
 
-/* RENDER CARDÁPIO */
+/* CARDÁPIO GARÇOM */
 
 function renderizarCardapio(){
 
@@ -647,6 +681,12 @@ R$ ${item.preco.toFixed(2)}
 ${item.descricao}
 </div>
 
+<button
+class="btn-cliente"
+onclick="adicionarPedidoCliente('${item.firebaseId}')">
+Adicionar ao Pedido
+</button>
+
 </div>
 
 </div>
@@ -657,7 +697,7 @@ ${item.descricao}
 
 }
 
-/* REMOVER PRODUTO */
+/* REMOVER */
 
 window.removerProduto = async function(id){
 
@@ -673,7 +713,7 @@ carregarProdutos();
 
 }
 
-/* PEDIDOS */
+/* PEDIDO GARÇOM */
 
 window.adicionarPedido = function(id){
 
@@ -733,6 +773,113 @@ R$ ${item.preco.toFixed(2)}
 document.getElementById("total")
 .innerHTML =
 "Total: R$ " + total.toFixed(2);
+
+}
+
+/* PEDIDO CLIENTE */
+
+window.adicionarPedidoCliente = function(id){
+
+const item =
+cardapio.find(i=>i.firebaseId === id);
+
+pedidoCliente.push(item);
+
+renderizarPedidoCliente();
+
+}
+
+function renderizarPedidoCliente(){
+
+const pedidoDiv =
+document.getElementById("pedidoCliente");
+
+if(pedidoCliente.length === 0){
+
+pedidoDiv.innerHTML = `
+<div class="empty">
+Nenhum item adicionado
+</div>
+`;
+
+document.getElementById("totalCliente")
+.innerHTML = "Total: R$ 0,00";
+
+return;
+
+}
+
+pedidoDiv.innerHTML = "";
+
+let total = 0;
+
+pedidoCliente.forEach(item=>{
+
+total += item.preco;
+
+pedidoDiv.innerHTML += `
+
+<div class="order-item">
+
+<div>
+${item.nome}
+</div>
+
+<div>
+R$ ${item.preco.toFixed(2)}
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("totalCliente")
+.innerHTML =
+"Total: R$ " + total.toFixed(2);
+
+}
+
+/* ENVIAR PEDIDO CLIENTE */
+
+window.enviarPedidoCliente = async function(){
+
+if(pedidoCliente.length === 0){
+
+alert("Adicione itens!");
+return;
+
+}
+
+const params =
+new URLSearchParams(window.location.search);
+
+const mesa =
+params.get("mesa") || "Sem Mesa";
+
+let total = 0;
+
+pedidoCliente.forEach(item=>{
+total += item.preco;
+});
+
+await addDoc(
+collection(db, "pedidos"),
+{
+mesa,
+itens:pedidoCliente,
+total,
+status:"pendente",
+data:new Date().toLocaleString()
+}
+);
+
+alert("Pedido enviado para cozinha!");
+
+pedidoCliente = [];
+
+renderizarPedidoCliente();
 
 }
 
@@ -834,8 +981,6 @@ return;
 
 qrGrid.innerHTML = "";
 
-/* LINK SOMENTE CARDÁPIO */
-
 const cardapioURL =
 window.location.origin +
 window.location.pathname +
@@ -884,6 +1029,7 @@ height:180
 carregarProdutos();
 
 renderizarPedido();
+renderizarPedidoCliente();
 
 /* MODO CLIENTE */
 
@@ -892,6 +1038,19 @@ new URLSearchParams(window.location.search);
 
 const modoCliente =
 params.get("cliente");
+
+const mesaURL =
+params.get("mesa");
+
+if(mesaURL){
+
+const mesaInfo =
+document.getElementById("mesaClienteInfo");
+
+mesaInfo.innerHTML =
+"🍽️ Você está na Mesa " + mesaURL;
+
+}
 
 if(modoCliente === "true"){
 
