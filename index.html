@@ -499,12 +499,12 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey: "SUA_API_KEY",
-authDomain: "SEU_DOMINIO.firebaseapp.com",
-projectId: "SEU_PROJECT_ID",
-storageBucket: "SEU_BUCKET",
-messagingSenderId: "SEU_SENDER_ID",
-appId: "SEU_APP_ID"
+apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
+authDomain: "garcompro-bd3b3.firebaseapp.com",
+projectId: "garcompro-bd3b3",
+storageBucket: "garcompro-bd3b3.firebasestorage.app",
+messagingSenderId: "311775314838",
+appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
 
 };
 
@@ -513,7 +513,6 @@ const db = getFirestore(app);
 const { jsPDF } = window.jspdf;
 
 let cardapio = [];
-let pedido = [];
 let pedidoCliente = [];
 
 /* ABAS */
@@ -541,6 +540,8 @@ botao.classList.add("active");
 
 async function carregarProdutos(){
 
+try{
+
 const querySnapshot =
 await getDocs(collection(db, "produtos"));
 
@@ -558,27 +559,36 @@ firebaseId: docItem.id,
 renderizarCardapio();
 renderizarCliente();
 
+}catch(erro){
+
+console.error(erro);
+alert("Erro ao carregar produtos!");
+
+}
+
 }
 
 /* ADICIONAR PRODUTO */
 
 window.adicionarItem = async function(){
 
+try{
+
 const nome =
-document.getElementById("nome").value;
+document.getElementById("nome").value.trim();
 
 const preco =
 document.getElementById("preco").value;
 
 const descricao =
-document.getElementById("descricao").value;
+document.getElementById("descricao").value.trim();
 
 const imagemInput =
 document.getElementById("imagem");
 
 if(!nome || !preco){
 
-alert("Preencha os campos!");
+alert("Preencha nome e preço!");
 return;
 
 }
@@ -586,13 +596,20 @@ return;
 const arquivo =
 imagemInput.files[0];
 
-if(arquivo){
+if(!arquivo){
+
+alert("Selecione uma imagem!");
+return;
+
+}
 
 const reader =
 new FileReader();
 
 reader.onload =
 async function(e){
+
+try{
 
 const produto = {
 
@@ -610,26 +627,30 @@ produto
 
 alert("Produto salvo!");
 
-limparFormulario();
+document.getElementById("nome").value = "";
+document.getElementById("preco").value = "";
+document.getElementById("descricao").value = "";
+document.getElementById("imagem").value = "";
 
-carregarProdutos();
+await carregarProdutos();
+
+}catch(erro){
+
+console.error(erro);
+alert("Erro ao salvar produto!");
+
+}
 
 };
 
 reader.readAsDataURL(arquivo);
 
-}
+}catch(erro){
+
+console.error(erro);
+alert("Erro no sistema!");
 
 }
-
-/* LIMPAR */
-
-function limparFormulario(){
-
-document.getElementById("nome").value = "";
-document.getElementById("preco").value = "";
-document.getElementById("descricao").value = "";
-document.getElementById("imagem").value = "";
 
 }
 
@@ -664,14 +685,9 @@ ${item.descricao}
 
 <div class="actions">
 
-<button class="btn-add"
-onclick="adicionarPedido('${item.firebaseId}')">
-Adicionar
-</button>
-
 <button class="btn-remove"
 onclick="removerProduto('${item.firebaseId}')">
-✕
+🗑️ Remover
 </button>
 
 </div>
@@ -683,8 +699,6 @@ onclick="removerProduto('${item.firebaseId}')">
 `;
 
 });
-
-renderizarCliente();
 
 }
 
@@ -904,6 +918,8 @@ document.getElementById("totalCliente")
 
 window.enviarPedidoCliente = async function(){
 
+try{
+
 if(pedidoCliente.length === 0){
 
 alert("Adicione itens!");
@@ -920,9 +936,7 @@ params.get("mesa") || "Sem Mesa";
 let total = 0;
 
 pedidoCliente.forEach(item=>{
-
 total += item.preco * item.quantidade;
-
 });
 
 await addDoc(
@@ -936,11 +950,18 @@ data:new Date().toLocaleString()
 }
 );
 
-alert("Pedido enviado para cozinha!");
+alert("Pedido enviado com sucesso!");
 
 pedidoCliente = [];
 
 renderizarPedidoCliente();
+
+}catch(erro){
+
+console.error(erro);
+alert("Erro ao enviar pedido!");
+
+}
 
 }
 
@@ -986,9 +1007,7 @@ lista.innerHTML += `
 
 <div class="admin-pedido">
 
-<h3>
-🍽️ Mesa ${pedido.mesa}
-</h3>
+<h3>🍽️ Mesa ${pedido.mesa}</h3>
 
 ${itensHTML}
 
@@ -1014,20 +1033,14 @@ onclick="marcarEntregue('${docItem.id}')">
 `
 <button
 class="btn-primary"
-style="
-background:#f59e0b;
-margin-top:15px;
-"
+style="background:#f59e0b;margin-top:15px;"
 onclick="marcarPendente('${docItem.id}')">
 ↩️ Voltar para Pendente
 </button>
 
 <button
 class="btn-remove"
-style="
-width:100%;
-margin-top:10px;
-"
+style="width:100%;margin-top:10px;"
 onclick="apagarPedido('${docItem.id}')">
 🗑️ Excluir Pedido
 </button>
@@ -1115,9 +1128,7 @@ qrGrid.innerHTML += `
 <div class="qr-card"
 id="cardMesa${i}">
 
-<h3>
-🍽️ Mesa ${i}
-</h3>
+<h3>🍽️ Mesa ${i}</h3>
 
 <div
 id="${qrId}"
@@ -1195,15 +1206,6 @@ height:260px;
 margin-top:20px;
 }
 
-h1{
-margin-bottom:10px;
-}
-
-p{
-font-size:18px;
-margin-top:20px;
-}
-
 button{
 margin-top:30px;
 padding:14px 20px;
@@ -1219,10 +1221,6 @@ cursor:pointer;
 
 button{
 display:none;
-}
-
-body{
-padding-top:80px;
 }
 
 }
