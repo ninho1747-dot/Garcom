@@ -132,7 +132,6 @@ margin-top:10px;
 }
 
 .btn-add{
-flex:1;
 background:#2563eb;
 color:white;
 }
@@ -197,18 +196,11 @@ margin-bottom:15px;
 font-size:14px;
 }
 
-.actions{
-display:flex;
-gap:10px;
-}
-
 .order-item{
 background:#334155;
 padding:12px;
 border-radius:12px;
 margin-bottom:10px;
-display:flex;
-justify-content:space-between;
 }
 
 .total{
@@ -286,11 +278,6 @@ grid-template-columns:1fr;
 <div class="tabs">
 
 <button class="tab-btn active"
-onclick="abrirAba('garcom', this)">
-🍽️ Garçom
-</button>
-
-<button class="tab-btn"
 onclick="abrirAba('admin', this)">
 ⚙️ Admin
 </button>
@@ -307,50 +294,9 @@ onclick="abrirAba('qr', this)">
 
 </div>
 
-<!-- GARÇOM -->
-
-<div id="garcom" class="tab-content active">
-
-<div class="grid">
-
-<div class="card">
-
-<h2>🧾 Pedido Atual</h2>
-
-<div class="form-group">
-<label>Número da Mesa</label>
-<input type="number" id="mesa">
-</div>
-
-<div id="pedido"></div>
-
-<div class="total" id="total">
-Total: R$ 0,00
-</div>
-
-<button class="btn-primary"
-onclick="baixarNotaFiscal()">
-🧾 Imprimir Nota Fiscal
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>📋 Cardápio</h2>
-
-<div class="menu-grid"
-id="menuGrid"></div>
-
-</div>
-
-</div>
-
-</div>
-
 <!-- ADMIN -->
 
-<div id="admin" class="tab-content">
+<div id="admin" class="tab-content active">
 
 <div class="grid">
 
@@ -436,8 +382,7 @@ id="clienteMenu"></div>
 
 <div id="pedidoCliente"></div>
 
-<div
-class="total"
+<div class="total"
 id="totalCliente">
 Total: R$ 0,00
 </div>
@@ -510,7 +455,6 @@ appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const { jsPDF } = window.jspdf;
 
 let cardapio = [];
 let pedidoCliente = [];
@@ -536,11 +480,9 @@ botao.classList.add("active");
 
 }
 
-/* CARREGAR PRODUTOS */
+/* PRODUTOS */
 
 async function carregarProdutos(){
-
-try{
 
 const querySnapshot =
 await getDocs(collection(db, "produtos"));
@@ -556,39 +498,27 @@ firebaseId: docItem.id,
 
 });
 
-renderizarCardapio();
 renderizarCliente();
 
-}catch(erro){
-
-console.error(erro);
-alert("Erro ao carregar produtos!");
-
 }
-
-}
-
-/* ADICIONAR PRODUTO */
 
 window.adicionarItem = async function(){
 
-try{
-
 const nome =
-document.getElementById("nome").value.trim();
+document.getElementById("nome").value;
 
 const preco =
 document.getElementById("preco").value;
 
 const descricao =
-document.getElementById("descricao").value.trim();
+document.getElementById("descricao").value;
 
 const imagemInput =
 document.getElementById("imagem");
 
 if(!nome || !preco){
 
-alert("Preencha nome e preço!");
+alert("Preencha os campos!");
 return;
 
 }
@@ -608,8 +538,6 @@ new FileReader();
 
 reader.onload =
 async function(e){
-
-try{
 
 const produto = {
 
@@ -632,73 +560,11 @@ document.getElementById("preco").value = "";
 document.getElementById("descricao").value = "";
 document.getElementById("imagem").value = "";
 
-await carregarProdutos();
-
-}catch(erro){
-
-console.error(erro);
-alert("Erro ao salvar produto!");
-
-}
+carregarProdutos();
 
 };
 
 reader.readAsDataURL(arquivo);
-
-}catch(erro){
-
-console.error(erro);
-alert("Erro no sistema!");
-
-}
-
-}
-
-/* CARDÁPIO */
-
-function renderizarCardapio(){
-
-const menuGrid =
-document.getElementById("menuGrid");
-
-menuGrid.innerHTML = "";
-
-cardapio.forEach(item=>{
-
-menuGrid.innerHTML += `
-
-<div class="item-card">
-
-<img src="${item.imagem}">
-
-<div class="item-content">
-
-<h3>${item.nome}</h3>
-
-<div class="price">
-R$ ${item.preco.toFixed(2)}
-</div>
-
-<div class="desc">
-${item.descricao}
-</div>
-
-<div class="actions">
-
-<button class="btn-remove"
-onclick="removerProduto('${item.firebaseId}')">
-🗑️ Remover
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
 
 }
 
@@ -747,24 +613,6 @@ Adicionar ao Pedido
 
 }
 
-/* REMOVER PRODUTO */
-
-window.removerProduto = async function(id){
-
-if(confirm("Deseja remover este produto?")){
-
-await deleteDoc(
-doc(db, "produtos", id)
-);
-
-carregarProdutos();
-
-}
-
-}
-
-/* PEDIDO CLIENTE */
-
 window.adicionarPedidoCliente = function(id){
 
 const item =
@@ -793,7 +641,6 @@ renderizarPedidoCliente();
 window.aumentarQuantidade = function(index){
 
 pedidoCliente[index].quantidade += 1;
-
 renderizarPedidoCliente();
 
 }
@@ -840,22 +687,15 @@ total += subtotal;
 
 pedidoDiv.innerHTML += `
 
-<div class="order-item"
-style="
-flex-direction:column;
-align-items:flex-start;
-gap:10px;
-">
+<div class="order-item">
 
 <div style="
-width:100%;
 display:flex;
 justify-content:space-between;
+margin-bottom:10px;
 ">
 
-<div>
-${item.nome}
-</div>
+<div>${item.nome}</div>
 
 <div>
 R$ ${subtotal.toFixed(2)}
@@ -866,23 +706,21 @@ R$ ${subtotal.toFixed(2)}
 <div style="
 display:flex;
 gap:10px;
-width:100%;
 ">
 
 <button
 class="btn-remove"
-style="width:50px;"
 onclick="diminuirQuantidade(${index})">
 -
 </button>
 
 <div style="
 flex:1;
+display:flex;
+justify-content:center;
+align-items:center;
 background:#1e293b;
 border-radius:10px;
-display:flex;
-align-items:center;
-justify-content:center;
 font-weight:700;
 ">
 ${item.quantidade}
@@ -918,8 +756,6 @@ document.getElementById("totalCliente")
 
 window.enviarPedidoCliente = async function(){
 
-try{
-
 if(pedidoCliente.length === 0){
 
 alert("Adicione itens!");
@@ -950,18 +786,11 @@ data:new Date().toLocaleString()
 }
 );
 
-alert("Pedido enviado com sucesso!");
+alert("Pedido enviado!");
 
 pedidoCliente = [];
 
 renderizarPedidoCliente();
-
-}catch(erro){
-
-console.error(erro);
-alert("Erro ao enviar pedido!");
-
-}
 
 }
 
@@ -991,14 +820,26 @@ const subtotal =
 item.preco * item.quantidade;
 
 itensHTML += `
+
 <div class="order-item">
+
+<div style="
+display:flex;
+justify-content:space-between;
+">
+
 <div>
 ${item.nome} x${item.quantidade}
 </div>
+
 <div>
 R$ ${subtotal.toFixed(2)}
 </div>
+
 </div>
+
+</div>
+
 `;
 
 });
@@ -1007,7 +848,9 @@ lista.innerHTML += `
 
 <div class="admin-pedido">
 
-<h3>🍽️ Mesa ${pedido.mesa}</h3>
+<h3>
+🍽️ Mesa ${pedido.mesa}
+</h3>
 
 ${itensHTML}
 
@@ -1033,14 +876,33 @@ onclick="marcarEntregue('${docItem.id}')">
 `
 <button
 class="btn-primary"
-style="background:#f59e0b;margin-top:15px;"
+style="
+background:#f59e0b;
+margin-top:15px;
+"
 onclick="marcarPendente('${docItem.id}')">
 ↩️ Voltar para Pendente
 </button>
 
 <button
+class="btn-print"
+style="
+margin-top:10px;
+"
+onclick='imprimirNotaFiscalAdmin(
+"${pedido.mesa}",
+${JSON.stringify(pedido.itens)},
+"${pedido.total}"
+)'>
+🧾 Imprimir Nota Fiscal
+</button>
+
+<button
 class="btn-remove"
-style="width:100%;margin-top:10px;"
+style="
+width:100%;
+margin-top:10px;
+"
 onclick="apagarPedido('${docItem.id}')">
 🗑️ Excluir Pedido
 </button>
@@ -1056,8 +918,6 @@ onclick="apagarPedido('${docItem.id}')">
 });
 
 }
-
-/* STATUS */
 
 window.marcarEntregue = async function(id){
 
@@ -1081,26 +941,19 @@ status:"pendente"
 
 }
 
-/* EXCLUIR PEDIDO */
-
 window.apagarPedido = async function(id){
 
-const confirmar =
-confirm("Deseja excluir este pedido?");
-
-if(!confirmar){
-return;
-}
+if(confirm("Excluir pedido?")){
 
 await deleteDoc(
 doc(db, "pedidos", id)
 );
 
-alert("Pedido excluído!");
+}
 
 }
 
-/* QR CODE */
+/* QR */
 
 window.gerarQRCodes = function(){
 
@@ -1128,7 +981,9 @@ qrGrid.innerHTML += `
 <div class="qr-card"
 id="cardMesa${i}">
 
-<h3>🍽️ Mesa ${i}</h3>
+<h3>
+🍽️ Mesa ${i}
+</h3>
 
 <div
 id="${qrId}"
@@ -1161,8 +1016,6 @@ height:180
 }
 
 }
-
-/* IMPRIMIR QR */
 
 window.imprimirQRCode = function(mesa){
 
@@ -1238,6 +1091,169 @@ display:none;
 <p>
 Escaneie para abrir o cardápio
 </p>
+
+<button onclick="window.print()">
+🖨️ Imprimir
+</button>
+
+</body>
+
+</html>
+
+`);
+
+janela.document.close();
+
+}
+
+/* NOTA FISCAL ADMIN */
+
+window.imprimirNotaFiscalAdmin = function(mesa,itens,total){
+
+const janela =
+window.open("", "", "width=350,height=700");
+
+let itensHTML = "";
+
+itens.forEach(item=>{
+
+const subtotal =
+item.preco * item.quantidade;
+
+itensHTML += `
+
+<tr>
+
+<td>${item.nome}</td>
+
+<td style="text-align:center;">
+${item.quantidade}
+</td>
+
+<td style="text-align:right;">
+R$ ${subtotal.toFixed(2)}
+</td>
+
+</tr>
+
+`;
+
+});
+
+janela.document.write(`
+
+<html>
+
+<head>
+
+<title>Nota Fiscal</title>
+
+<style>
+
+body{
+font-family:monospace;
+padding:10px;
+width:300px;
+}
+
+h1,h2,p{
+text-align:center;
+margin:5px 0;
+}
+
+table{
+width:100%;
+margin-top:15px;
+border-collapse:collapse;
+}
+
+td{
+padding:5px 0;
+font-size:13px;
+border-bottom:1px dashed #000;
+}
+
+.total{
+margin-top:15px;
+font-size:18px;
+font-weight:bold;
+text-align:right;
+}
+
+hr{
+border:none;
+border-top:1px dashed #000;
+margin:10px 0;
+}
+
+button{
+width:100%;
+margin-top:20px;
+padding:12px;
+border:none;
+background:black;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+@media print{
+
+button{
+display:none;
+}
+
+body{
+width:100%;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>GARÇOM PRO</h1>
+
+<p>CUPOM NÃO FISCAL</p>
+
+<hr>
+
+<p>Mesa: ${mesa}</p>
+
+<p>${new Date().toLocaleString()}</p>
+
+<table>
+
+<tr>
+
+<td>
+<strong>Item</strong>
+</td>
+
+<td style="text-align:center;">
+<strong>Qtd</strong>
+</td>
+
+<td style="text-align:right;">
+<strong>Total</strong>
+</td>
+
+</tr>
+
+${itensHTML}
+
+</table>
+
+<div class="total">
+TOTAL: R$ ${parseFloat(total).toFixed(2)}
+</div>
+
+<hr>
+
+<h2>Obrigado pela preferência!</h2>
 
 <button onclick="window.print()">
 🖨️ Imprimir
