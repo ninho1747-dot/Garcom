@@ -499,12 +499,12 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
-authDomain: "garcompro-bd3b3.firebaseapp.com",
-projectId: "garcompro-bd3b3",
-storageBucket: "garcompro-bd3b3.firebasestorage.app",
-messagingSenderId: "311775314838",
-appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
+apiKey: "SUA_API_KEY",
+authDomain: "SEU_DOMINIO.firebaseapp.com",
+projectId: "SEU_PROJECT_ID",
+storageBucket: "SEU_BUCKET",
+messagingSenderId: "SEU_SENDER_ID",
+appId: "SEU_APP_ID"
 
 };
 
@@ -746,52 +746,6 @@ doc(db, "produtos", id)
 carregarProdutos();
 
 }
-
-}
-
-/* PEDIDO GARÇOM */
-
-window.adicionarPedido = function(id){
-
-const item =
-cardapio.find(i=>i.firebaseId === id);
-
-pedido.push(item);
-
-renderizarPedido();
-
-}
-
-function renderizarPedido(){
-
-const pedidoDiv =
-document.getElementById("pedido");
-
-pedidoDiv.innerHTML = "";
-
-let total = 0;
-
-pedido.forEach(item=>{
-
-total += item.preco;
-
-pedidoDiv.innerHTML += `
-
-<div class="order-item">
-
-<div>${item.nome}</div>
-
-<div>R$ ${item.preco.toFixed(2)}</div>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("total")
-.innerHTML =
-"Total: R$ " + total.toFixed(2);
 
 }
 
@@ -1067,13 +1021,7 @@ margin-top:15px;
 onclick="marcarPendente('${docItem.id}')">
 ↩️ Voltar para Pendente
 </button>
-`
-}
 
-${
-pedido.status === "entregue"
-?
-`
 <button
 class="btn-remove"
 style="
@@ -1084,8 +1032,6 @@ onclick="apagarPedido('${docItem.id}')">
 🗑️ Excluir Pedido
 </button>
 `
-:
-""
 }
 
 </div>
@@ -1098,15 +1044,12 @@ onclick="apagarPedido('${docItem.id}')">
 
 }
 
-/* MARCAR ENTREGUE */
+/* STATUS */
 
 window.marcarEntregue = async function(id){
 
-const pedidoRef =
-doc(db, "pedidos", id);
-
 await updateDoc(
-pedidoRef,
+doc(db, "pedidos", id),
 {
 status:"entregue"
 }
@@ -1114,15 +1057,10 @@ status:"entregue"
 
 }
 
-/* VOLTAR PARA PENDENTE */
-
 window.marcarPendente = async function(id){
 
-const pedidoRef =
-doc(db, "pedidos", id);
-
 await updateDoc(
-pedidoRef,
+doc(db, "pedidos", id),
 {
 status:"pendente"
 }
@@ -1149,56 +1087,6 @@ alert("Pedido excluído!");
 
 }
 
-/* NOTA FISCAL */
-
-window.baixarNotaFiscal = function(){
-
-const mesa =
-document.getElementById("mesa").value;
-
-const docPDF = new jsPDF();
-
-docPDF.setFontSize(20);
-
-docPDF.text("NOTA FISCAL", 65, 20);
-
-docPDF.text(
-"Mesa: " + mesa,
-20,
-40
-);
-
-let y = 60;
-
-let total = 0;
-
-pedido.forEach(item=>{
-
-docPDF.text(
-item.nome +
-" - R$ " +
-item.preco.toFixed(2),
-20,
-y
-);
-
-y += 10;
-
-total += item.preco;
-
-});
-
-docPDF.text(
-"TOTAL: R$ " +
-total.toFixed(2),
-20,
-y + 20
-);
-
-window.open(docPDF.output('bloburl'));
-
-}
-
 /* QR CODE */
 
 window.gerarQRCodes = function(){
@@ -1211,19 +1099,14 @@ document.getElementById("quantidadeMesas").value
 const qrGrid =
 document.getElementById("qrGrid");
 
+qrGrid.innerHTML = "";
+
 const cardapioURL =
 window.location.origin +
 window.location.pathname +
 "?cliente=true";
 
 for(let i=1;i<=quantidade;i++){
-
-const qrExistente =
-document.getElementById("qrMesa"+i);
-
-if(qrExistente){
-continue;
-}
 
 const qrId = "qrMesa"+i;
 
@@ -1272,11 +1155,20 @@ height:180
 
 window.imprimirQRCode = function(mesa){
 
-const qrElemento =
-document.getElementById("cardMesa"+mesa);
+const qrCanvas =
+document.querySelector(
+"#qrMesa" + mesa + " canvas"
+);
 
-const qrImagem =
-qrElemento.querySelector("img");
+if(!qrCanvas){
+
+alert("QR Code não encontrado!");
+return;
+
+}
+
+const qrBase64 =
+qrCanvas.toDataURL("image/png");
 
 const janela =
 window.open("", "_blank", "width=500,height=700");
@@ -1294,23 +1186,45 @@ janela.document.write(`
 body{
 font-family:Arial;
 text-align:center;
-padding:30px;
+padding:40px;
 }
 
 img{
-width:220px;
-height:220px;
+width:260px;
+height:260px;
+margin-top:20px;
+}
+
+h1{
+margin-bottom:10px;
+}
+
+p{
+font-size:18px;
+margin-top:20px;
 }
 
 button{
-padding:12px 20px;
+margin-top:30px;
+padding:14px 20px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 background:#2563eb;
 color:white;
 font-size:16px;
 cursor:pointer;
-margin-top:20px;
+}
+
+@media print{
+
+button{
+display:none;
+}
+
+body{
+padding-top:80px;
+}
+
 }
 
 </style>
@@ -1321,9 +1235,9 @@ margin-top:20px;
 
 <h1>🍽️ Mesa ${mesa}</h1>
 
-<img src="${qrImagem.src}">
+<img src="${qrBase64}">
 
-<p style="margin-top:20px;">
+<p>
 Escaneie para abrir o cardápio
 </p>
 
@@ -1345,8 +1259,6 @@ janela.document.close();
 
 carregarProdutos();
 carregarPedidosAdmin();
-renderizarPedido();
-renderizarPedidoCliente();
 
 /* MODO CLIENTE */
 
