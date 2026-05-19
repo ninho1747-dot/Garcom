@@ -32,11 +32,6 @@ text-align:center;
 box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
 
-header h1{
-font-size:28px;
-font-weight:700;
-}
-
 .container{
 width:95%;
 max-width:1500px;
@@ -59,7 +54,6 @@ background:#1e293b;
 color:#fff;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
 }
 
 .tab-btn.active{
@@ -224,6 +218,7 @@ background:#111827;
 padding:20px;
 border-radius:20px;
 text-align:center;
+position:relative;
 }
 
 .qrcode{
@@ -256,6 +251,22 @@ background:#dc2626;
 
 .entregue{
 background:#16a34a;
+}
+
+.ocupada{
+background:#dc2626;
+padding:8px;
+border-radius:10px;
+margin-top:10px;
+font-weight:bold;
+}
+
+.livre{
+background:#16a34a;
+padding:8px;
+border-radius:10px;
+margin-top:10px;
+font-weight:bold;
 }
 
 @media(max-width:900px){
@@ -324,13 +335,10 @@ onclick="abrirAba('qr', this)">
 
 <div class="form-group">
 <label>Foto</label>
-<input type="file"
-id="imagem"
-accept="image/*">
+<input type="file" id="imagem" accept="image/*">
 </div>
 
-<button class="btn-primary"
-onclick="adicionarItem()">
+<button class="btn-primary" onclick="adicionarItem()">
 ➕ Adicionar Produto
 </button>
 
@@ -362,8 +370,7 @@ onclick="adicionarItem()">
 
 <h2>📱 Cardápio Digital</h2>
 
-<div
-id="mesaClienteInfo"
+<div id="mesaClienteInfo"
 style="
 margin-bottom:20px;
 background:#334155;
@@ -388,23 +395,17 @@ Escolha a mesa
 
 </div>
 
-<div class="menu-grid"
-id="clienteMenu"></div>
+<div class="menu-grid" id="clienteMenu"></div>
 
-<h2 style="margin-top:30px;">
-🛒 Meu Pedido
-</h2>
+<h2 style="margin-top:30px;">🛒 Meu Pedido</h2>
 
 <div id="pedidoCliente"></div>
 
-<div class="total"
-id="totalCliente">
+<div class="total" id="totalCliente">
 Total: R$ 0,00
 </div>
 
-<button
-class="btn-primary"
-onclick="enviarPedidoCliente()">
+<button class="btn-primary" onclick="enviarPedidoCliente()">
 📤 Enviar Pedido
 </button>
 
@@ -422,17 +423,14 @@ onclick="enviarPedidoCliente()">
 
 <div class="form-group">
 <label>Quantidade de Mesas</label>
-<input type="number"
-id="quantidadeMesas">
+<input type="number" id="quantidadeMesas">
 </div>
 
-<button class="btn-primary"
-onclick="gerarQRCodes()">
+<button class="btn-primary" onclick="gerarQRCodes()">
 🔳 Gerar QR Codes
 </button>
 
-<div class="qr-grid"
-id="qrGrid"></div>
+<div class="qr-grid" id="qrGrid"></div>
 
 </div>
 
@@ -453,7 +451,9 @@ getDocs,
 deleteDoc,
 doc,
 updateDoc,
-onSnapshot
+onSnapshot,
+setDoc,
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -519,17 +519,10 @@ renderizarCliente();
 
 window.adicionarItem = async function(){
 
-const nome =
-document.getElementById("nome").value;
-
-const preco =
-document.getElementById("preco").value;
-
-const descricao =
-document.getElementById("descricao").value;
-
-const imagemInput =
-document.getElementById("imagem");
+const nome = document.getElementById("nome").value;
+const preco = document.getElementById("preco").value;
+const descricao = document.getElementById("descricao").value;
+const imagemInput = document.getElementById("imagem");
 
 if(!nome || !preco){
 
@@ -538,8 +531,7 @@ return;
 
 }
 
-const arquivo =
-imagemInput.files[0];
+const arquivo = imagemInput.files[0];
 
 if(!arquivo){
 
@@ -548,11 +540,9 @@ return;
 
 }
 
-const reader =
-new FileReader();
+const reader = new FileReader();
 
-reader.onload =
-async function(e){
+reader.onload = async function(e){
 
 const produto = {
 
@@ -612,8 +602,7 @@ R$ ${item.preco.toFixed(2)}
 ${item.descricao}
 </div>
 
-<button
-class="btn-cliente"
+<button class="btn-cliente"
 onclick="adicionarPedidoCliente('${item.firebaseId}')">
 Adicionar ao Pedido
 </button>
@@ -702,7 +691,6 @@ renderizarPedidoCliente();
 window.removerItemCliente = function(index){
 
 pedidoCliente.splice(index,1);
-
 renderizarPedidoCliente();
 
 }
@@ -746,8 +734,7 @@ display:flex;
 gap:10px;
 ">
 
-<button
-class="btn-remove"
+<button class="btn-remove"
 onclick="diminuirQuantidade(${index})">
 -
 </button>
@@ -764,14 +751,12 @@ font-weight:700;
 ${item.quantidade}
 </div>
 
-<button
-class="btn-add"
+<button class="btn-add"
 onclick="aumentarQuantidade(${index})">
 +
 </button>
 
-<button
-class="btn-remove"
+<button class="btn-remove"
 onclick="removerItemCliente(${index})">
 🗑️
 </button>
@@ -811,6 +796,12 @@ return;
 
 }
 
+const mesaRef = doc(db, "mesas", mesaSelecionada);
+
+await setDoc(mesaRef,{
+ocupada:true
+});
+
 let total = 0;
 
 pedidoCliente.forEach(item=>{
@@ -833,6 +824,8 @@ alert("Pedido enviado!");
 pedidoCliente = [];
 
 renderizarPedidoCliente();
+
+carregarStatusMesas();
 
 }
 
@@ -918,10 +911,7 @@ onclick="marcarEntregue('${docItem.id}')">
 `
 <button
 class="btn-primary"
-style="
-background:#f59e0b;
-margin-top:15px;
-"
+style="background:#f59e0b;margin-top:15px;"
 onclick="marcarPendente('${docItem.id}')">
 ↩️ Voltar para Pendente
 </button>
@@ -935,11 +925,8 @@ onclick="imprimirNotaFiscalAdmin('${docItem.id}')">
 
 <button
 class="btn-remove"
-style="
-width:100%;
-margin-top:10px;
-"
-onclick="apagarPedido('${docItem.id}')">
+style="width:100%;margin-top:10px;"
+onclick="apagarPedido('${docItem.id}','${pedido.mesa}')">
 🗑️ Excluir Pedido
 </button>
 `
@@ -977,7 +964,7 @@ status:"pendente"
 
 }
 
-window.apagarPedido = async function(id){
+window.apagarPedido = async function(id,mesa){
 
 if(confirm("Excluir pedido?")){
 
@@ -985,13 +972,54 @@ await deleteDoc(
 doc(db, "pedidos", id)
 );
 
+await setDoc(
+doc(db,"mesas",mesa),
+{
+ocupada:false
 }
+);
+
+carregarStatusMesas();
+
+}
+
+}
+
+/* STATUS MESAS */
+
+async function carregarStatusMesas(){
+
+const qrGrid =
+document.getElementById("qrGrid");
+
+const mesasSnapshot =
+await getDocs(collection(db,"mesas"));
+
+mesasSnapshot.forEach((mesaDoc)=>{
+
+const mesa = mesaDoc.id;
+const dados = mesaDoc.data();
+
+const statusDiv =
+document.getElementById("statusMesa"+mesa);
+
+if(statusDiv){
+
+statusDiv.className =
+dados.ocupada ? "ocupada" : "livre";
+
+statusDiv.innerHTML =
+dados.ocupada ? "🔴 Ocupada" : "🟢 Livre";
+
+}
+
+});
 
 }
 
 /* QR */
 
-window.gerarQRCodes = function(){
+window.gerarQRCodes = async function(){
 
 const quantidade =
 parseInt(
@@ -1001,14 +1029,16 @@ document.getElementById("quantidadeMesas").value
 const qrGrid =
 document.getElementById("qrGrid");
 
-qrGrid.innerHTML = "";
-
 const cardapioURL =
 window.location.origin +
 window.location.pathname +
 "?cliente=true";
 
 for(let i=1;i<=quantidade;i++){
+
+if(document.getElementById("cardMesa"+i)){
+continue;
+}
 
 const qrId = "qrMesa"+i;
 
@@ -1017,23 +1047,30 @@ qrGrid.innerHTML += `
 <div class="qr-card"
 id="cardMesa${i}">
 
-<h3>
-🍽️ Mesa ${i}
-</h3>
+<h3>🍽️ Mesa ${i}</h3>
 
-<div
-id="${qrId}"
+<div id="${qrId}"
 class="qrcode">
+</div>
+
+<div id="statusMesa${i}"
+class="livre">
+🟢 Livre
 </div>
 
 <p style="margin-top:10px;">
 Escaneie para abrir o cardápio
 </p>
 
-<button
-class="btn-print"
+<button class="btn-print"
 onclick="imprimirQRCode(${i})">
 🖨️ Imprimir QR Code
+</button>
+
+<button class="btn-remove"
+style="width:100%;margin-top:10px;"
+onclick="apagarQRCode(${i})">
+🗑️ Apagar QR
 </button>
 
 </div>
@@ -1049,9 +1086,42 @@ height:180
 }
 );
 
+await setDoc(
+doc(db,"mesas",String(i)),
+{
+ocupada:false
+},
+{merge:true}
+);
+
+}
+
+carregarStatusMesas();
+
+}
+
+/* APAGAR QR */
+
+window.apagarQRCode = async function(mesa){
+
+if(confirm("Apagar QR da mesa "+mesa+"?")){
+
+const card =
+document.getElementById("cardMesa"+mesa);
+
+if(card){
+card.remove();
+}
+
+await deleteDoc(
+doc(db,"mesas",String(mesa))
+);
+
 }
 
 }
+
+/* IMPRIMIR QR */
 
 window.imprimirQRCode = function(mesa){
 
@@ -1107,11 +1177,9 @@ cursor:pointer;
 }
 
 @media print{
-
 button{
 display:none;
 }
-
 }
 
 </style>
@@ -1216,11 +1284,6 @@ padding:10px;
 width:300px;
 }
 
-h1,h2,p{
-text-align:center;
-margin:5px 0;
-}
-
 table{
 width:100%;
 margin-top:15px;
@@ -1240,12 +1303,6 @@ font-weight:bold;
 text-align:right;
 }
 
-hr{
-border:none;
-border-top:1px dashed #000;
-margin:10px 0;
-}
-
 button{
 width:100%;
 margin-top:20px;
@@ -1258,11 +1315,9 @@ cursor:pointer;
 }
 
 @media print{
-
 button{
 display:none;
 }
-
 }
 
 </style>
@@ -1271,9 +1326,13 @@ display:none;
 
 <body>
 
-<h1>GARÇOM PRO</h1>
+<h2 style="text-align:center;">
+GARÇOM PRO
+</h2>
 
-<p>CUPOM NÃO FISCAL</p>
+<p style="text-align:center;">
+CUPOM NÃO FISCAL
+</p>
 
 <hr>
 
@@ -1287,11 +1346,11 @@ display:none;
 
 <td><strong>Item</strong></td>
 
-<td style="text-align:center;">
+<td align="center">
 <strong>Qtd</strong>
 </td>
 
-<td style="text-align:right;">
+<td align="right">
 <strong>Total</strong>
 </td>
 
@@ -1304,10 +1363,6 @@ ${itensHTML}
 <div class="total">
 TOTAL: R$ ${parseFloat(pedido.total).toFixed(2)}
 </div>
-
-<hr>
-
-<h2>Obrigado pela preferência!</h2>
 
 <button onclick="window.print()">
 🖨️ Imprimir
@@ -1328,6 +1383,7 @@ janela.document.close();
 carregarProdutos();
 carregarPedidosAdmin();
 carregarMesas();
+carregarStatusMesas();
 
 /* MODO CLIENTE */
 
@@ -1336,6 +1392,20 @@ new URLSearchParams(window.location.search);
 
 const modoCliente =
 params.get("cliente");
+
+const mesaURL =
+params.get("mesa");
+
+if(mesaURL){
+
+document.getElementById("mesaSelecionada").value =
+mesaURL;
+
+document.getElementById("mesaClienteInfo")
+.innerHTML =
+"🍽️ Você está na Mesa " + mesaURL;
+
+}
 
 if(modoCliente === "true"){
 
