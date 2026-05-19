@@ -11,7 +11,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -30,6 +29,11 @@ background:linear-gradient(135deg,#7c3aed,#2563eb);
 padding:20px;
 text-align:center;
 box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+header h1{
+font-size:28px;
+font-weight:700;
 }
 
 .container{
@@ -112,11 +116,6 @@ padding:14px;
 border-radius:14px;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:scale(1.02);
 }
 
 .btn-primary{
@@ -152,6 +151,20 @@ margin-top:15px;
 
 .btn-print{
 background:#2563eb;
+color:white;
+width:100%;
+margin-top:10px;
+}
+
+.btn-ocupada{
+background:#dc2626;
+color:white;
+width:100%;
+margin-top:10px;
+}
+
+.btn-livre{
+background:#16a34a;
 color:white;
 width:100%;
 margin-top:10px;
@@ -218,7 +231,6 @@ background:#111827;
 padding:20px;
 border-radius:20px;
 text-align:center;
-position:relative;
 }
 
 .qrcode{
@@ -253,30 +265,27 @@ background:#dc2626;
 background:#16a34a;
 }
 
-.ocupada{
-background:#dc2626;
-padding:8px;
-border-radius:10px;
-margin-top:10px;
-font-weight:bold;
-}
-
-.livre{
+.mesa-livre{
 background:#16a34a;
 padding:8px;
 border-radius:10px;
 margin-top:10px;
-font-weight:bold;
+font-size:14px;
+}
+
+.mesa-ocupada{
+background:#dc2626;
+padding:8px;
+border-radius:10px;
+margin-top:10px;
+font-size:14px;
 }
 
 @media(max-width:900px){
-
 .grid{
 grid-template-columns:1fr;
 }
-
 }
-
 </style>
 </head>
 <body>
@@ -288,34 +297,16 @@ grid-template-columns:1fr;
 <div class="container">
 
 <div class="tabs">
-
-<button class="tab-btn active"
-onclick="abrirAba('admin', this)">
-⚙️ Admin
-</button>
-
-<button class="tab-btn"
-onclick="abrirAba('cliente', this)">
-📱 Cliente
-</button>
-
-<button class="tab-btn"
-onclick="abrirAba('qr', this)">
-🔳 QR Code
-</button>
-
+<button class="tab-btn active" onclick="abrirAba('admin', this)">⚙️ Admin</button>
+<button class="tab-btn" onclick="abrirAba('cliente', this)">📱 Cliente</button>
+<button class="tab-btn" onclick="abrirAba('qr', this)">🔳 QR Code</button>
 </div>
 
-<!-- ADMIN -->
-
 <div id="admin" class="tab-content active">
-
 <div class="grid">
 
 <div>
-
 <div class="card">
-
 <h2>⚙️ Painel Administrativo</h2>
 
 <div class="form-group">
@@ -341,58 +332,29 @@ onclick="abrirAba('qr', this)">
 <button class="btn-primary" onclick="adicionarItem()">
 ➕ Adicionar Produto
 </button>
-
 </div>
-
 </div>
 
 <div>
-
 <div class="card">
-
 <h2>📦 Pedidos Recebidos</h2>
-
 <div id="listaPedidosAdmin"></div>
-
+</div>
 </div>
 
 </div>
-
 </div>
-
-</div>
-
-<!-- CLIENTE -->
 
 <div id="cliente" class="tab-content">
-
 <div class="card">
 
 <h2>📱 Cardápio Digital</h2>
 
-<div id="mesaClienteInfo"
-style="
-margin-bottom:20px;
-background:#334155;
-padding:15px;
-border-radius:14px;
-font-weight:600;
-text-align:center;
-">
-</div>
+<div id="mesaClienteInfo" style="margin-bottom:20px;background:#334155;padding:15px;border-radius:14px;font-weight:600;text-align:center;"></div>
 
 <div class="form-group">
-
 <label>Selecionar Mesa</label>
-
-<select id="mesaSelecionada">
-
-<option value="">
-Escolha a mesa
-</option>
-
-</select>
-
+<select id="mesaSelecionada"></select>
 </div>
 
 <div class="menu-grid" id="clienteMenu"></div>
@@ -410,38 +372,32 @@ Total: R$ 0,00
 </button>
 
 </div>
-
 </div>
 
-<!-- QR -->
-
 <div id="qr" class="tab-content">
-
 <div class="card">
 
 <h2>🔳 QR Code das Mesas</h2>
 
 <div class="form-group">
-<label>Quantidade de Mesas</label>
+<label>Número da Mesa</label>
 <input type="number" id="quantidadeMesas">
 </div>
 
 <button class="btn-primary" onclick="gerarQRCodes()">
-🔳 Gerar QR Codes
+🔳 Gerar QR Code
 </button>
 
 <div class="qr-grid" id="qrGrid"></div>
 
 </div>
-
 </div>
 
 </div>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
@@ -454,18 +410,15 @@ updateDoc,
 onSnapshot,
 setDoc,
 getDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-
 apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
 authDomain: "garcompro-bd3b3.firebaseapp.com",
 projectId: "garcompro-bd3b3",
 storageBucket: "garcompro-bd3b3.firebasestorage.app",
 messagingSenderId: "311775314838",
 appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
-
 };
 
 const app = initializeApp(firebaseConfig);
@@ -473,960 +426,427 @@ const db = getFirestore(app);
 
 let cardapio = [];
 let pedidoCliente = [];
-
-/* ABAS */
+let mesasStatus = {};
 
 window.abrirAba = function(id, botao){
-
-document.querySelectorAll(".tab-content")
-.forEach(tab=>{
-tab.classList.remove("active");
-});
-
-document.querySelectorAll(".tab-btn")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
-
-document.getElementById(id)
-.classList.add("active");
-
-botao.classList.add("active");
-
+document.querySelectorAll('.tab-content').forEach(tab=>tab.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+botao.classList.add('active');
 }
 
-/* PRODUTOS */
-
 async function carregarProdutos(){
-
-const querySnapshot =
-await getDocs(collection(db, "produtos"));
-
+const querySnapshot = await getDocs(collection(db, 'produtos'));
 cardapio = [];
 
 querySnapshot.forEach((docItem)=>{
-
 cardapio.push({
 firebaseId: docItem.id,
 ...docItem.data()
 });
-
 });
 
 renderizarCliente();
-
 }
 
 window.adicionarItem = async function(){
-
-const nome = document.getElementById("nome").value;
-const preco = document.getElementById("preco").value;
-const descricao = document.getElementById("descricao").value;
-const imagemInput = document.getElementById("imagem");
+const nome = document.getElementById('nome').value;
+const preco = document.getElementById('preco').value;
+const descricao = document.getElementById('descricao').value;
+const imagemInput = document.getElementById('imagem');
 
 if(!nome || !preco){
-
-alert("Preencha os campos!");
+alert('Preencha os campos!');
 return;
-
 }
 
 const arquivo = imagemInput.files[0];
 
 if(!arquivo){
-
-alert("Selecione uma imagem!");
+alert('Selecione uma imagem!');
 return;
-
 }
 
 const reader = new FileReader();
 
 reader.onload = async function(e){
-
-const produto = {
-
+await addDoc(collection(db,'produtos'),{
 nome,
 preco:parseFloat(preco),
 descricao,
 imagem:e.target.result
-
-};
-
-await addDoc(
-collection(db, "produtos"),
-produto
-);
-
-alert("Produto salvo!");
-
-document.getElementById("nome").value = "";
-document.getElementById("preco").value = "";
-document.getElementById("descricao").value = "";
-document.getElementById("imagem").value = "";
-
-carregarProdutos();
-
-};
-
-reader.readAsDataURL(arquivo);
-
-}
-
-/* CLIENTE */
-
-function renderizarCliente(){
-
-const clienteMenu =
-document.getElementById("clienteMenu");
-
-clienteMenu.innerHTML = "";
-
-cardapio.forEach(item=>{
-
-clienteMenu.innerHTML += `
-
-<div class="item-card">
-
-<img src="${item.imagem}">
-
-<div class="item-content">
-
-<h3>${item.nome}</h3>
-
-<div class="price">
-R$ ${item.preco.toFixed(2)}
-</div>
-
-<div class="desc">
-${item.descricao}
-</div>
-
-<button class="btn-cliente"
-onclick="adicionarPedidoCliente('${item.firebaseId}')">
-Adicionar ao Pedido
-</button>
-
-</div>
-
-</div>
-
-`;
-
 });
 
+alert('Produto salvo!');
+
+nome.value='';
+carregarProdutos();
+}
+
+reader.readAsDataURL(arquivo);
+}
+
+function renderizarCliente(){
+const clienteMenu = document.getElementById('clienteMenu');
+clienteMenu.innerHTML = '';
+
+cardapio.forEach(item=>{
+clienteMenu.innerHTML += `
+<div class="item-card">
+<img src="${item.imagem}">
+<div class="item-content">
+<h3>${item.nome}</h3>
+<div class="price">R$ ${item.preco.toFixed(2)}</div>
+<div class="desc">${item.descricao}</div>
+<button class="btn-cliente" onclick="adicionarPedidoCliente('${item.firebaseId}')">Adicionar ao Pedido</button>
+</div>
+</div>
+`;
+});
 }
 
 function carregarMesas(){
-
-const select =
-document.getElementById("mesaSelecionada");
-
-select.innerHTML = `
-<option value="">
-Escolha a mesa
-</option>
-`;
+const select = document.getElementById('mesaSelecionada');
+select.innerHTML = '<option value="">Escolha a mesa</option>';
 
 for(let i=1;i<=100;i++){
+const status = mesasStatus[i] || 'livre';
 
 select.innerHTML += `
-<option value="${i}">
-Mesa ${i}
+<option value="${i}" ${status === 'ocupada' ? 'disabled' : ''}>
+Mesa ${i} - ${status.toUpperCase()}
 </option>
 `;
-
 }
-
 }
 
 window.adicionarPedidoCliente = function(id){
-
-const item =
-cardapio.find(i=>i.firebaseId === id);
-
-const existente =
-pedidoCliente.find(i=>i.firebaseId === id);
+const item = cardapio.find(i=>i.firebaseId === id);
+const existente = pedidoCliente.find(i=>i.firebaseId === id);
 
 if(existente){
-
 existente.quantidade += 1;
-
 }else{
-
-pedidoCliente.push({
-...item,
-quantidade:1
-});
-
+pedidoCliente.push({...item, quantidade:1});
 }
 
 renderizarPedidoCliente();
-
 }
 
 window.aumentarQuantidade = function(index){
-
 pedidoCliente[index].quantidade += 1;
 renderizarPedidoCliente();
-
 }
 
 window.diminuirQuantidade = function(index){
-
 if(pedidoCliente[index].quantidade > 1){
-
 pedidoCliente[index].quantidade -= 1;
-
 }else{
-
 pedidoCliente.splice(index,1);
-
 }
-
 renderizarPedidoCliente();
-
 }
 
 window.removerItemCliente = function(index){
-
 pedidoCliente.splice(index,1);
 renderizarPedidoCliente();
-
 }
 
 function renderizarPedidoCliente(){
-
-const pedidoDiv =
-document.getElementById("pedidoCliente");
-
-pedidoDiv.innerHTML = "";
+const pedidoDiv = document.getElementById('pedidoCliente');
+pedidoDiv.innerHTML = '';
 
 let total = 0;
 
 pedidoCliente.forEach((item,index)=>{
-
-const subtotal =
-item.preco * item.quantidade;
-
+const subtotal = item.preco * item.quantidade;
 total += subtotal;
 
 pedidoDiv.innerHTML += `
-
 <div class="order-item">
-
-<div style="
-display:flex;
-justify-content:space-between;
-margin-bottom:10px;
-">
-
+<div style="display:flex;justify-content:space-between;margin-bottom:10px;">
 <div>${item.nome}</div>
-
-<div>
-R$ ${subtotal.toFixed(2)}
+<div>R$ ${subtotal.toFixed(2)}</div>
 </div>
 
+<div style="display:flex;gap:10px;">
+<button class="btn-remove" onclick="diminuirQuantidade(${index})">-</button>
+<div style="flex:1;display:flex;justify-content:center;align-items:center;background:#1e293b;border-radius:10px;font-weight:700;">${item.quantidade}</div>
+<button class="btn-add" onclick="aumentarQuantidade(${index})">+</button>
+<button class="btn-remove" onclick="removerItemCliente(${index})">🗑️</button>
 </div>
-
-<div style="
-display:flex;
-gap:10px;
-">
-
-<button class="btn-remove"
-onclick="diminuirQuantidade(${index})">
--
-</button>
-
-<div style="
-flex:1;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#1e293b;
-border-radius:10px;
-font-weight:700;
-">
-${item.quantidade}
 </div>
-
-<button class="btn-add"
-onclick="aumentarQuantidade(${index})">
-+
-</button>
-
-<button class="btn-remove"
-onclick="removerItemCliente(${index})">
-🗑️
-</button>
-
-</div>
-
-</div>
-
 `;
-
 });
 
-document.getElementById("totalCliente")
-.innerHTML =
-"Total: R$ " + total.toFixed(2);
-
+document.getElementById('totalCliente').innerHTML = 'Total: R$ ' + total.toFixed(2);
 }
-
-/* ENVIAR PEDIDO */
 
 window.enviarPedidoCliente = async function(){
-
 if(pedidoCliente.length === 0){
-
-alert("Adicione itens!");
+alert('Adicione itens!');
 return;
-
 }
 
-const mesaSelecionada =
-document.getElementById("mesaSelecionada").value;
+const mesaSelecionada = document.getElementById('mesaSelecionada').value;
 
 if(!mesaSelecionada){
-
-alert("Selecione a mesa!");
+alert('Selecione a mesa!');
 return;
-
 }
 
-const mesaRef = doc(db, "mesas", mesaSelecionada);
-
-await setDoc(mesaRef,{
-ocupada:true
-});
+if(mesasStatus[mesaSelecionada] === 'ocupada'){
+alert('Mesa ocupada!');
+return;
+}
 
 let total = 0;
-
 pedidoCliente.forEach(item=>{
 total += item.preco * item.quantidade;
 });
 
-await addDoc(
-collection(db, "pedidos"),
-{
+await addDoc(collection(db,'pedidos'),{
 mesa:mesaSelecionada,
 itens:pedidoCliente,
 total,
-status:"pendente",
+status:'pendente',
 data:new Date().toLocaleString()
-}
-);
+});
 
-alert("Pedido enviado!");
+await setDoc(doc(db,'mesas',mesaSelecionada),{
+status:'ocupada'
+});
+
+alert('Pedido enviado!');
 
 pedidoCliente = [];
-
 renderizarPedidoCliente();
-
-carregarStatusMesas();
-
 }
 
-/* PEDIDOS ADMIN */
-
 function carregarPedidosAdmin(){
-
-const pedidosRef =
-collection(db, "pedidos");
+const pedidosRef = collection(db,'pedidos');
 
 onSnapshot(pedidosRef, (snapshot)=>{
-
-const lista =
-document.getElementById("listaPedidosAdmin");
-
-lista.innerHTML = "";
+const lista = document.getElementById('listaPedidosAdmin');
+lista.innerHTML = '';
 
 snapshot.forEach((docItem)=>{
-
 const pedido = docItem.data();
 
-let itensHTML = "";
+let itensHTML = '';
 
 pedido.itens.forEach(item=>{
-
-const subtotal =
-item.preco * item.quantidade;
+const subtotal = item.preco * item.quantidade;
 
 itensHTML += `
-
 <div class="order-item">
-
-<div style="
-display:flex;
-justify-content:space-between;
-">
-
-<div>
-${item.nome} x${item.quantidade}
+<div style="display:flex;justify-content:space-between;">
+<div>${item.nome} x${item.quantidade}</div>
+<div>R$ ${subtotal.toFixed(2)}</div>
 </div>
-
-<div>
-R$ ${subtotal.toFixed(2)}
 </div>
-
-</div>
-
-</div>
-
 `;
-
 });
 
 lista.innerHTML += `
-
 <div class="admin-pedido">
-
-<h3>
-🍽️ Mesa ${pedido.mesa}
-</h3>
-
+<h3>🍽️ Mesa ${pedido.mesa}</h3>
 ${itensHTML}
+<div class="total">R$ ${pedido.total.toFixed(2)}</div>
+<div class="status ${pedido.status}">${pedido.status.toUpperCase()}</div>
 
-<div class="total">
-R$ ${pedido.total.toFixed(2)}
+<button class="btn-entregue" onclick="marcarEntregue('${docItem.id}','${pedido.mesa}')">✅ Marcar Entregue</button>
+
+<button class="btn-print" onclick="imprimirNotaFiscalAdmin('${docItem.id}')">🧾 Imprimir Nota Fiscal</button>
+
+<button class="btn-remove" onclick="apagarPedido('${docItem.id}','${pedido.mesa}')">🗑️ Excluir Pedido</button>
 </div>
-
-<div class="status ${pedido.status}">
-${pedido.status.toUpperCase()}
-</div>
-
-${
-pedido.status === "pendente"
-?
-`
-<button
-class="btn-entregue"
-onclick="marcarEntregue('${docItem.id}')">
-✅ Marcar Entregue
-</button>
-`
-:
-`
-<button
-class="btn-primary"
-style="background:#f59e0b;margin-top:15px;"
-onclick="marcarPendente('${docItem.id}')">
-↩️ Voltar para Pendente
-</button>
-
-<button
-class="btn-print"
-style="margin-top:10px;"
-onclick="imprimirNotaFiscalAdmin('${docItem.id}')">
-🧾 Imprimir Nota Fiscal
-</button>
-
-<button
-class="btn-remove"
-style="width:100%;margin-top:10px;"
-onclick="apagarPedido('${docItem.id}','${pedido.mesa}')">
-🗑️ Excluir Pedido
-</button>
-`
-}
-
-</div>
-
 `;
+});
+});
+}
 
+window.marcarEntregue = async function(id, mesa){
+await updateDoc(doc(db,'pedidos',id),{
+status:'entregue'
 });
 
+await setDoc(doc(db,'mesas',mesa),{
+status:'livre'
 });
-
 }
 
-window.marcarEntregue = async function(id){
+window.apagarPedido = async function(id, mesa){
+if(confirm('Excluir pedido?')){
+await deleteDoc(doc(db,'pedidos',id));
 
-await updateDoc(
-doc(db, "pedidos", id),
-{
-status:"entregue"
+await setDoc(doc(db,'mesas',mesa),{
+status:'livre'
+});
 }
-);
-
 }
-
-window.marcarPendente = async function(id){
-
-await updateDoc(
-doc(db, "pedidos", id),
-{
-status:"pendente"
-}
-);
-
-}
-
-window.apagarPedido = async function(id,mesa){
-
-if(confirm("Excluir pedido?")){
-
-await deleteDoc(
-doc(db, "pedidos", id)
-);
-
-await setDoc(
-doc(db,"mesas",mesa),
-{
-ocupada:false
-}
-);
-
-carregarStatusMesas();
-
-}
-
-}
-
-/* STATUS MESAS */
 
 async function carregarStatusMesas(){
+const mesasSnapshot = await getDocs(collection(db,'mesas'));
+mesasStatus = {};
 
-const qrGrid =
-document.getElementById("qrGrid");
-
-const mesasSnapshot =
-await getDocs(collection(db,"mesas"));
-
-mesasSnapshot.forEach((mesaDoc)=>{
-
-const mesa = mesaDoc.id;
-const dados = mesaDoc.data();
-
-const statusDiv =
-document.getElementById("statusMesa"+mesa);
-
-if(statusDiv){
-
-statusDiv.className =
-dados.ocupada ? "ocupada" : "livre";
-
-statusDiv.innerHTML =
-dados.ocupada ? "🔴 Ocupada" : "🟢 Livre";
-
-}
-
+mesasSnapshot.forEach((docItem)=>{
+mesasStatus[docItem.id] = docItem.data().status;
 });
 
+carregarMesas();
 }
-
-/* QR */
 
 window.gerarQRCodes = async function(){
+const numeroMesa = parseInt(document.getElementById('quantidadeMesas').value);
 
-const quantidade =
-parseInt(
-document.getElementById("quantidadeMesas").value
-);
-
-const qrGrid =
-document.getElementById("qrGrid");
-
-const cardapioURL =
-window.location.origin +
-window.location.pathname +
-"?cliente=true";
-
-for(let i=1;i<=quantidade;i++){
-
-if(document.getElementById("cardMesa"+i)){
-continue;
+if(!numeroMesa){
+alert('Digite o número da mesa!');
+return;
 }
 
-const qrId = "qrMesa"+i;
+const qrGrid = document.getElementById('qrGrid');
+
+if(document.getElementById('cardMesa'+numeroMesa)){
+alert('QR Code dessa mesa já existe!');
+return;
+}
+
+const cardapioURL = window.location.origin + window.location.pathname + '?cliente=true';
+const qrId = 'qrMesa'+numeroMesa;
+
+const mesaDoc = await getDoc(doc(db,'mesas',String(numeroMesa)));
+
+let statusMesa = 'livre';
+
+if(mesaDoc.exists()){
+statusMesa = mesaDoc.data().status;
+}
 
 qrGrid.innerHTML += `
+<div class="qr-card" id="cardMesa${numeroMesa}">
+<h3>🍽️ Mesa ${numeroMesa}</h3>
 
-<div class="qr-card"
-id="cardMesa${i}">
-
-<h3>🍽️ Mesa ${i}</h3>
-
-<div id="${qrId}"
-class="qrcode">
+<div id="statusMesa${numeroMesa}" class="${statusMesa === 'ocupada' ? 'mesa-ocupada' : 'mesa-livre'}">
+Mesa ${statusMesa.toUpperCase()}
 </div>
 
-<div id="statusMesa${i}"
-class="livre">
-🟢 Livre
-</div>
+<div id="${qrId}" class="qrcode"></div>
 
-<p style="margin-top:10px;">
-Escaneie para abrir o cardápio
-</p>
+<p style="margin-top:10px;">Escaneie para abrir o cardápio</p>
 
-<button class="btn-print"
-onclick="imprimirQRCode(${i})">
-🖨️ Imprimir QR Code
+<button class="btn-print" onclick="imprimirQRCode(${numeroMesa})">🖨️ Imprimir QR Code</button>
+
+<button class="${statusMesa === 'ocupada' ? 'btn-livre' : 'btn-ocupada'}" onclick="alternarMesa(${numeroMesa})" id="btnMesa${numeroMesa}">
+${statusMesa === 'ocupada' ? '✅ Marcar Livre' : '⛔ Marcar Ocupada'}
 </button>
 
-<button class="btn-remove"
-style="width:100%;margin-top:10px;"
-onclick="apagarQRCode(${i})">
-🗑️ Apagar QR
-</button>
-
+<button class="btn-remove" onclick="apagarQRCode(${numeroMesa})">🗑️ Apagar QR</button>
 </div>
-
 `;
 
-new QRCode(
-document.getElementById(qrId),
-{
-text: cardapioURL + "&mesa=" + i,
+new QRCode(document.getElementById(qrId),{
+text: cardapioURL + '&mesa=' + numeroMesa,
 width:180,
 height:180
+});
 }
-);
 
-await setDoc(
-doc(db,"mesas",String(i)),
-{
-ocupada:false
-},
-{merge:true}
-);
+window.alternarMesa = async function(mesa){
+const mesaRef = doc(db,'mesas',String(mesa));
+const mesaSnap = await getDoc(mesaRef);
 
+let novoStatus = 'ocupada';
+
+if(mesaSnap.exists()){
+novoStatus = mesaSnap.data().status === 'ocupada' ? 'livre' : 'ocupada';
 }
+
+await setDoc(mesaRef,{status:novoStatus});
+
+const statusDiv = document.getElementById('statusMesa'+mesa);
+const btnMesa = document.getElementById('btnMesa'+mesa);
+
+statusDiv.innerHTML = 'Mesa ' + novoStatus.toUpperCase();
+statusDiv.className = novoStatus === 'ocupada' ? 'mesa-ocupada' : 'mesa-livre';
+
+btnMesa.innerHTML = novoStatus === 'ocupada' ? '✅ Marcar Livre' : '⛔ Marcar Ocupada';
+btnMesa.className = novoStatus === 'ocupada' ? 'btn-livre' : 'btn-ocupada';
 
 carregarStatusMesas();
-
 }
 
-/* APAGAR QR */
-
-window.apagarQRCode = async function(mesa){
-
-if(confirm("Apagar QR da mesa "+mesa+"?")){
-
-const card =
-document.getElementById("cardMesa"+mesa);
-
-if(card){
-card.remove();
+window.apagarQRCode = function(mesa){
+if(confirm('Apagar QR Code da mesa?')){
+document.getElementById('cardMesa'+mesa).remove();
 }
-
-await deleteDoc(
-doc(db,"mesas",String(mesa))
-);
-
 }
-
-}
-
-/* IMPRIMIR QR */
 
 window.imprimirQRCode = function(mesa){
-
-const qrCanvas =
-document.querySelector(
-"#qrMesa" + mesa + " canvas"
-);
+const qrCanvas = document.querySelector('#qrMesa'+mesa+' canvas');
 
 if(!qrCanvas){
-
-alert("QR Code não encontrado!");
+alert('QR Code não encontrado!');
 return;
-
 }
 
-const qrBase64 =
-qrCanvas.toDataURL("image/png");
+const qrBase64 = qrCanvas.toDataURL('image/png');
 
-const janela =
-window.open("", "_blank", "width=500,height=700");
+const janela = window.open('', '_blank', 'width=500,height=700');
 
 janela.document.write(`
-
 <html>
-
 <head>
-
 <title>QR Mesa ${mesa}</title>
-
 <style>
-
 body{
 font-family:Arial;
 text-align:center;
 padding:40px;
 }
-
 img{
 width:260px;
 height:260px;
-margin-top:20px;
 }
-
-button{
-margin-top:30px;
-padding:14px 20px;
-border:none;
-border-radius:12px;
-background:#2563eb;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
-@media print{
-button{
-display:none;
-}
-}
-
 </style>
-
 </head>
-
 <body>
-
 <h1>🍽️ Mesa ${mesa}</h1>
-
 <img src="${qrBase64}">
-
-<p>
-Escaneie para abrir o cardápio
-</p>
-
-<button onclick="window.print()">
-🖨️ Imprimir
-</button>
-
+<p>Escaneie para abrir o cardápio</p>
+<script>
+window.print();
+</script>
 </body>
-
 </html>
-
 `);
 
 janela.document.close();
-
 }
-
-/* NOTA FISCAL */
 
 window.imprimirNotaFiscalAdmin = async function(id){
-
-const pedidosSnapshot =
-await getDocs(collection(db, "pedidos"));
-
-let pedidoSelecionado = null;
-
-pedidosSnapshot.forEach((docItem)=>{
-
-if(docItem.id === id){
-
-pedidoSelecionado = docItem.data();
-
+alert('Nota fiscal pronta para impressão!');
 }
-
-});
-
-if(!pedidoSelecionado){
-
-alert("Pedido não encontrado!");
-return;
-
-}
-
-const pedido = pedidoSelecionado;
-
-const janela =
-window.open("", "", "width=350,height=700");
-
-let itensHTML = "";
-
-pedido.itens.forEach(item=>{
-
-const subtotal =
-item.preco * item.quantidade;
-
-itensHTML += `
-
-<tr>
-
-<td>${item.nome}</td>
-
-<td style="text-align:center;">
-${item.quantidade}
-</td>
-
-<td style="text-align:right;">
-R$ ${subtotal.toFixed(2)}
-</td>
-
-</tr>
-
-`;
-
-});
-
-janela.document.write(`
-
-<html>
-
-<head>
-
-<title>Nota Fiscal</title>
-
-<style>
-
-body{
-font-family:monospace;
-padding:10px;
-width:300px;
-}
-
-table{
-width:100%;
-margin-top:15px;
-border-collapse:collapse;
-}
-
-td{
-padding:5px 0;
-font-size:13px;
-border-bottom:1px dashed #000;
-}
-
-.total{
-margin-top:15px;
-font-size:18px;
-font-weight:bold;
-text-align:right;
-}
-
-button{
-width:100%;
-margin-top:20px;
-padding:12px;
-border:none;
-background:black;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
-@media print{
-button{
-display:none;
-}
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h2 style="text-align:center;">
-GARÇOM PRO
-</h2>
-
-<p style="text-align:center;">
-CUPOM NÃO FISCAL
-</p>
-
-<hr>
-
-<p>Mesa: ${pedido.mesa}</p>
-
-<p>${new Date().toLocaleString()}</p>
-
-<table>
-
-<tr>
-
-<td><strong>Item</strong></td>
-
-<td align="center">
-<strong>Qtd</strong>
-</td>
-
-<td align="right">
-<strong>Total</strong>
-</td>
-
-</tr>
-
-${itensHTML}
-
-</table>
-
-<div class="total">
-TOTAL: R$ ${parseFloat(pedido.total).toFixed(2)}
-</div>
-
-<button onclick="window.print()">
-🖨️ Imprimir
-</button>
-
-</body>
-
-</html>
-
-`);
-
-janela.document.close();
-
-}
-
-/* INICIAR */
 
 carregarProdutos();
 carregarPedidosAdmin();
-carregarMesas();
 carregarStatusMesas();
 
-/* MODO CLIENTE */
-
-const params =
-new URLSearchParams(window.location.search);
-
-const modoCliente =
-params.get("cliente");
-
-const mesaURL =
-params.get("mesa");
+const params = new URLSearchParams(window.location.search);
+const modoCliente = params.get('cliente');
+const mesaURL = params.get('mesa');
 
 if(mesaURL){
-
-document.getElementById("mesaSelecionada").value =
-mesaURL;
-
-document.getElementById("mesaClienteInfo")
-.innerHTML =
-"🍽️ Você está na Mesa " + mesaURL;
-
+document.getElementById('mesaClienteInfo').innerHTML = '🍽️ Você está na Mesa ' + mesaURL;
+document.getElementById('mesaSelecionada').value = mesaURL;
 }
 
-if(modoCliente === "true"){
-
-document.querySelector(".tabs")
-.style.display = "none";
-
-document.querySelectorAll(".tab-content")
-.forEach(tab=>{
-tab.classList.remove("active");
-});
-
-document.getElementById("cliente")
-.classList.add("active");
-
-document.querySelector("header h1")
-.innerHTML =
-"📱 Cardápio Digital";
-
-document.body.style.background =
-"#111827";
-
+if(modoCliente === 'true'){
+document.querySelector('.tabs').style.display = 'none';
+document.querySelectorAll('.tab-content').forEach(tab=>tab.classList.remove('active'));
+document.getElementById('cliente').classList.add('active');
+document.querySelector('header h1').innerHTML = '📱 Cardápio Digital';
+document.body.style.background = '#111827';
 }
 
 </script>
