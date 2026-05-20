@@ -389,6 +389,48 @@ onclick="gerarQRCodes()">
 
 </div>
 
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+onSnapshot
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
+authDomain: "garcompro-bd3b3.firebaseapp.com",
+projectId: "garcompro-bd3b3",
+storageBucket: "garcompro-bd3b3.appspot.com",
+messagingSenderId: "311775314838",
+appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.deleteDoc = deleteDoc;
+window.doc = doc;
+window.onSnapshot = onSnapshot;
+
+</script>
+
 <script>
 
 let produtos = [];
@@ -430,7 +472,7 @@ Mesa ${i}
 
 }
 
-function adicionarProduto(){
+async function adicionarProduto(){
 
 const nome =
 document.getElementById("nomeProduto").value;
@@ -453,21 +495,48 @@ return;
 
 const reader = new FileReader();
 
-reader.onload = function(e){
+reader.onload = async function(e){
 
-produtos.push({
-id:Date.now(),
+const produto = {
 nome,
 preco:parseFloat(preco),
 categoria,
 imagem:e.target.result
-});
+};
 
-renderizarMenu();
+await addDoc(
+collection(db,"produtos"),
+produto
+);
+
+alert("Produto salvo!");
 
 };
 
 reader.readAsDataURL(imagem);
+
+}
+
+async function carregarProdutos(){
+
+onSnapshot(
+collection(db,"produtos"),
+(snapshot)=>{
+
+produtos = [];
+
+snapshot.forEach(docItem=>{
+
+produtos.push({
+id:docItem.id,
+...docItem.data()
+});
+
+});
+
+renderizarMenu();
+
+});
 
 }
 
@@ -515,7 +584,7 @@ R$ ${item.preco.toFixed(2)}
 
 <button
 class="btn-remove"
-onclick="diminuir(${item.id})">
+onclick="diminuir('${item.id}')">
 
 -
 
@@ -531,7 +600,7 @@ id="qtd-${item.id}">
 
 <button
 class="btn-add"
-onclick="aumentar(${item.id})">
+onclick="aumentar('${item.id}')">
 
 +
 
@@ -556,12 +625,18 @@ function atualizarContador(id){
 const item =
 pedido.find(p=>p.id===id);
 
-document.getElementById("qtd-"+id)
-.innerHTML = item ? item.qtd : 0;
+const contador =
+document.getElementById("qtd-"+id);
+
+if(contador){
+
+contador.innerHTML = item ? item.qtd : 0;
 
 }
 
-function aumentar(id){
+}
+
+window.aumentar = function(id){
 
 const produto =
 produtos.find(p=>p.id===id);
@@ -588,7 +663,7 @@ renderizarPedido();
 
 }
 
-function diminuir(id){
+window.diminuir = function(id){
 
 let item =
 pedido.find(p=>p.id===id);
@@ -657,7 +732,7 @@ document.getElementById("totalPedido")
 
 }
 
-function enviarPedido(){
+window.enviarPedido = async function(){
 
 const mesa =
 document.getElementById("mesaCliente").value;
@@ -676,6 +751,16 @@ return;
 
 }
 
+await addDoc(
+collection(db,"pedidos"),
+{
+mesa,
+itens:pedido,
+status:"pendente",
+data:new Date().toLocaleString()
+}
+);
+
 mesasStatus[mesa] = "ocupada";
 
 localStorage.setItem(
@@ -689,11 +774,9 @@ pedido = [];
 
 renderizarPedido();
 
-renderizarMenu();
-
 }
 
-function gerarQRCodes(){
+window.gerarQRCodes = function(){
 
 const quantidade =
 parseInt(
@@ -752,30 +835,6 @@ onclick="alternarMesa(${i})">
 
 </button>
 
-<button
-class="btn-print"
-style="
-margin-top:10px;
-width:100%;
-"
-onclick="imprimirQR(${i})">
-
-🖨️ Imprimir
-
-</button>
-
-<button
-class="btn-remove"
-style="
-margin-top:10px;
-width:100%;
-"
-onclick="apagarQR(${i})">
-
-🗑️ Apagar
-
-</button>
-
 `;
 
 grid.appendChild(card);
@@ -796,7 +855,7 @@ height:180
 
 }
 
-function alternarMesa(numero){
+window.alternarMesa = function(numero){
 
 mesasStatus[numero] =
 mesasStatus[numero] === "ocupada"
@@ -816,63 +875,6 @@ mesasStatus[numero].toUpperCase();
 
 status.className =
 "status " + mesasStatus[numero];
-
-}
-
-function apagarQR(numero){
-
-if(confirm("Apagar QR?")){
-
-document
-.getElementById("mesaQR"+numero)
-.remove();
-
-delete mesasStatus[numero];
-
-localStorage.setItem(
-"mesasStatus",
-JSON.stringify(mesasStatus)
-);
-
-}
-
-}
-
-function imprimirQR(numero){
-
-const qr =
-document.querySelector(
-"#qr"+numero+" img"
-);
-
-const win =
-window.open("");
-
-win.document.write(`
-
-<html>
-
-<body style="
-text-align:center;
-font-family:Arial;
-padding:30px;
-">
-
-<h1>
-Mesa ${numero}
-</h1>
-
-<img src="${qr.src}">
-
-<script>
-window.print()
-<\/script>
-
-</body>
-
-</html>
-
-`);
 
 }
 
@@ -896,7 +898,7 @@ document
 
 }
 
-renderizarMenu();
+carregarProdutos();
 
 </script>
 
