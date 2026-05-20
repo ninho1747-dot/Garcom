@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GarçomPro Firebase</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
@@ -50,11 +46,11 @@ margin-bottom:20px;
 .tab-btn{
 padding:14px 20px;
 border:none;
-border-radius:14px;
+border-radius:12px;
 background:#1e293b;
-color:#fff;
-font-weight:600;
+color:white;
 cursor:pointer;
+font-weight:600;
 }
 
 .tab-btn.active{
@@ -78,17 +74,8 @@ margin-bottom:20px;
 
 .grid{
 display:grid;
-grid-template-columns:380px 1fr;
+grid-template-columns:350px 1fr;
 gap:20px;
-}
-
-.form-group{
-margin-bottom:15px;
-}
-
-label{
-display:block;
-margin-bottom:8px;
 }
 
 input,
@@ -97,54 +84,45 @@ select{
 width:100%;
 padding:14px;
 border:none;
-border-radius:14px;
+border-radius:12px;
 background:#334155;
 color:white;
+margin-bottom:15px;
+}
+
+textarea{
+height:90px;
+resize:none;
 }
 
 button{
 border:none;
-padding:14px;
-border-radius:14px;
-font-weight:600;
+padding:12px;
+border-radius:12px;
 cursor:pointer;
+font-weight:600;
 }
 
 .btn-primary{
-background:linear-gradient(135deg,#7c3aed,#2563eb);
+background:#2563eb;
 color:white;
 width:100%;
 }
 
-.btn-cliente{
+.btn-green{
 background:#16a34a;
 color:white;
-width:100%;
-margin-top:10px;
 }
 
-.btn-remove{
+.btn-red{
 background:#dc2626;
 color:white;
 }
 
-.btn-add{
-background:#2563eb;
-color:white;
-}
-
-.btn-entregue{
-background:#16a34a;
-color:white;
-width:100%;
-margin-top:10px;
-}
-
 .menu-grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-gap:15px;
-margin-top:20px;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:20px;
 }
 
 .item-card{
@@ -155,24 +133,24 @@ overflow:hidden;
 
 .item-card img{
 width:100%;
-height:120px;
+height:170px;
 object-fit:cover;
 }
 
 .item-content{
-padding:12px;
+padding:15px;
 }
 
 .price{
-font-size:18px;
-font-weight:700;
 color:#4ade80;
-margin:8px 0;
+font-weight:700;
+margin:10px 0;
 }
 
 .desc{
-font-size:12px;
+font-size:14px;
 color:#cbd5e1;
+margin-bottom:15px;
 }
 
 .order-item{
@@ -180,6 +158,22 @@ background:#334155;
 padding:12px;
 border-radius:12px;
 margin-bottom:10px;
+}
+
+.qtd-box{
+display:flex;
+gap:10px;
+margin-top:10px;
+align-items:center;
+}
+
+.qtd-number{
+flex:1;
+background:#1e293b;
+padding:10px;
+border-radius:10px;
+text-align:center;
+font-weight:700;
 }
 
 .total{
@@ -212,13 +206,19 @@ display:inline-block;
 margin-top:10px;
 }
 
+.admin-pedido{
+background:#111827;
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+}
+
 .status{
-padding:6px 12px;
+padding:8px 12px;
 border-radius:10px;
 display:inline-block;
-font-size:13px;
-margin-top:10px;
 font-weight:700;
+margin-top:10px;
 }
 
 .pendente{
@@ -227,20 +227,6 @@ background:#dc2626;
 
 .entregue{
 background:#16a34a;
-}
-
-.ocupada{
-background:#dc2626;
-padding:8px;
-border-radius:10px;
-margin-top:10px;
-}
-
-.livre{
-background:#16a34a;
-padding:8px;
-border-radius:10px;
-margin-top:10px;
 }
 
 @media(max-width:900px){
@@ -252,9 +238,7 @@ grid-template-columns:1fr;
 }
 
 </style>
-
 </head>
-
 <body>
 
 <header>
@@ -263,7 +247,7 @@ grid-template-columns:1fr;
 
 <div class="container">
 
-<div class="tabs">
+<div class="tabs" id="tabsSistema">
 
 <button class="tab-btn active"
 onclick="abrirAba('garcom',this)">
@@ -282,7 +266,7 @@ onclick="abrirAba('cliente',this)">
 
 <button class="tab-btn"
 onclick="abrirAba('qr',this)">
-🔳 QR Code
+🔳 QR Codes
 </button>
 
 </div>
@@ -291,18 +275,13 @@ onclick="abrirAba('qr',this)">
 
 <div id="garcom" class="tab-content active">
 
+<div class="grid">
+
 <div class="card">
 
-<h2>🍽️ Pedido Manual do Garçom</h2>
+<h2>🧾 Pedido Manual</h2>
 
-<div class="form-group">
-<label>Número da Mesa</label>
 <select id="mesaGarcom"></select>
-</div>
-
-<div class="menu-grid" id="menuGarcom"></div>
-
-<h2 style="margin-top:30px;">🛒 Pedido Atual</h2>
 
 <div id="pedidoGarcom"></div>
 
@@ -317,6 +296,19 @@ onclick="enviarPedidoGarcom()">
 
 </div>
 
+<div class="card">
+
+<h2 style="margin-bottom:20px;">
+📋 Cardápio
+</h2>
+
+<div class="menu-grid"
+id="menuGarcom"></div>
+
+</div>
+
+</div>
+
 </div>
 
 <!-- ADMIN -->
@@ -325,51 +317,54 @@ onclick="enviarPedidoGarcom()">
 
 <div class="grid">
 
+<div>
+
 <div class="card">
 
-<h2>➕ Adicionar Produto</h2>
+<h2>➕ Produto</h2>
 
-<div class="form-group">
-<label>Nome</label>
-<input type="text" id="nome">
-</div>
+<input type="text"
+id="nome"
+placeholder="Nome">
 
-<div class="form-group">
-<label>Preço</label>
-<input type="number" id="preco">
-</div>
+<input type="number"
+id="preco"
+placeholder="Preço">
 
-<div class="form-group">
-<label>Descrição</label>
-<textarea id="descricao"></textarea>
-</div>
-
-<div class="form-group">
-<label>Categoria</label>
 <select id="categoria">
-<option value="Bebidas">🍹 Bebidas</option>
-<option value="Tira Gostos">🍟 Tira Gostos</option>
-<option value="Jantar">🍛 Jantar</option>
-</select>
-</div>
 
-<div class="form-group">
-<label>Imagem</label>
-<input type="file" id="imagem" accept="image/*">
-</div>
+<option>Bebidas</option>
+<option>Tira Gostos</option>
+<option>Jantar</option>
+
+</select>
+
+<textarea
+id="descricao"
+placeholder="Descrição"></textarea>
+
+<input type="file"
+id="imagem"
+accept="image/*">
 
 <button class="btn-primary"
-onclick="adicionarItem()">
-➕ Adicionar Produto
+onclick="adicionarProduto()">
+Salvar Produto
 </button>
 
 </div>
+
+</div>
+
+<div>
 
 <div class="card">
 
 <h2>📦 Pedidos</h2>
 
-<div id="listaPedidosAdmin"></div>
+<div id="listaPedidos"></div>
+
+</div>
 
 </div>
 
@@ -385,22 +380,27 @@ onclick="adicionarItem()">
 
 <h2>📱 Cardápio Digital</h2>
 
-<div id="mesaClienteInfo"></div>
-
-<div class="form-group">
-<label>Selecionar Mesa</label>
-<select id="mesaSelecionada"></select>
+<div id="mesaInfo"
+style="
+background:#334155;
+padding:15px;
+border-radius:12px;
+margin-bottom:20px;
+text-align:center;
+font-weight:700;
+">
 </div>
 
 <div id="clienteMenu"></div>
 
 <h2 style="margin-top:30px;">
-🛒 Meu Pedido
+🛒 Resumo do Pedido
 </h2>
 
 <div id="pedidoCliente"></div>
 
-<div class="total" id="totalCliente">
+<div class="total"
+id="totalCliente">
 Total: R$ 0,00
 </div>
 
@@ -421,17 +421,17 @@ onclick="enviarPedidoCliente()">
 
 <h2>🔳 QR Codes</h2>
 
-<div class="form-group">
-<label>Quantidade de Mesas</label>
-<input type="number" id="quantidadeMesas">
-</div>
+<input type="number"
+id="numeroMesa"
+placeholder="Número da Mesa">
 
 <button class="btn-primary"
-onclick="gerarQRCodes()">
-Gerar QR Codes
+onclick="criarQRCodeMesa()">
+Criar QR Code
 </button>
 
-<div class="qr-grid" id="qrGrid"></div>
+<div class="qr-grid"
+id="qrGrid"></div>
 
 </div>
 
@@ -452,18 +452,20 @@ getDocs,
 deleteDoc,
 doc,
 updateDoc,
+setDoc,
+getDoc,
 onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey:"AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
-authDomain:"garcompro-bd3b3.firebaseapp.com",
-projectId:"garcompro-bd3b3",
-storageBucket:"garcompro-bd3b3.appspot.com",
-messagingSenderId:"311775314838",
-appId:"1:311775314838:web:b4cafc21f9b8850811d3b7"
+apiKey: "AIzaSyBsam8XGNicS8vlpehCVlI-8_JBKyk_v2M",
+authDomain: "garcompro-bd3b3.firebaseapp.com",
+projectId: "garcompro-bd3b3",
+storageBucket: "garcompro-bd3b3.firebasestorage.app",
+messagingSenderId: "311775314838",
+appId: "1:311775314838:web:b4cafc21f9b8850811d3b7"
 
 };
 
@@ -473,35 +475,34 @@ const db = getFirestore(app);
 let cardapio = [];
 let pedidoCliente = [];
 let pedidoGarcom = [];
-let mesas = {};
 
-window.abrirAba = function(id,botao){
+/* ABAS */
+
+window.abrirAba = function(id,btn){
 
 document.querySelectorAll(".tab-content")
-.forEach(tab=>{
-tab.classList.remove("active");
-});
+.forEach(t=>t.classList.remove("active"));
 
 document.querySelectorAll(".tab-btn")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
+.forEach(b=>b.classList.remove("active"));
 
 document.getElementById(id)
 .classList.add("active");
 
-botao.classList.add("active");
+btn.classList.add("active");
 
 }
 
+/* CARREGAR PRODUTOS */
+
 async function carregarProdutos(){
 
-const snapshot =
+const snap =
 await getDocs(collection(db,"produtos"));
 
 cardapio = [];
 
-snapshot.forEach(docItem=>{
+snap.forEach(docItem=>{
 
 cardapio.push({
 firebaseId:docItem.id,
@@ -515,7 +516,9 @@ renderizarGarcom();
 
 }
 
-window.adicionarItem = async function(){
+/* ADICIONAR PRODUTO */
+
+window.adicionarProduto = async function(){
 
 const nome =
 document.getElementById("nome").value;
@@ -523,35 +526,39 @@ document.getElementById("nome").value;
 const preco =
 document.getElementById("preco").value;
 
-const descricao =
-document.getElementById("descricao").value;
-
 const categoria =
 document.getElementById("categoria").value;
+
+const descricao =
+document.getElementById("descricao").value;
 
 const imagem =
 document.getElementById("imagem").files[0];
 
-if(!imagem){
-alert("Selecione uma imagem");
+if(!nome || !preco || !imagem){
+
+alert("Preencha todos os campos");
 return;
+
 }
 
-const reader = new FileReader();
+const reader =
+new FileReader();
 
 reader.onload = async function(e){
 
-await addDoc(collection(db,"produtos"),{
-
+await addDoc(
+collection(db,"produtos"),
+{
 nome,
 preco:parseFloat(preco),
-descricao,
 categoria,
+descricao,
 imagem:e.target.result
+}
+);
 
-});
-
-alert("Produto adicionado!");
+alert("Produto salvo!");
 
 carregarProdutos();
 
@@ -561,34 +568,12 @@ reader.readAsDataURL(imagem);
 
 }
 
-function renderizarCliente(){
+/* RENDER CARDÁPIO */
 
-const clienteMenu =
-document.getElementById("clienteMenu");
+function montarHTMLItem(item,funcao){
 
-clienteMenu.innerHTML = "";
+return `
 
-const categorias = [
-"Bebidas",
-"Tira Gostos",
-"Jantar"
-];
-
-categorias.forEach(cat=>{
-
-clienteMenu.innerHTML += `
-<h2 style="margin-top:20px;">${cat}</h2>
-<div class="menu-grid" id="cat-${cat}"></div>
-`;
-
-const area =
-document.getElementById(`cat-${cat}`);
-
-cardapio
-.filter(item=>item.categoria===cat)
-.forEach(item=>{
-
-area.innerHTML += `
 <div class="item-card">
 
 <img src="${item.imagem}">
@@ -605,33 +590,91 @@ R$ ${item.preco.toFixed(2)}
 ${item.descricao}
 </div>
 
-<button class="btn-cliente"
-onclick="adicionarPedidoCliente('${item.firebaseId}')">
+<button class="btn-green"
+style="width:100%;"
+onclick="${funcao}('${item.firebaseId}')">
 Adicionar
 </button>
 
 </div>
 
 </div>
+
 `;
 
-});
+}
+
+/* CLIENTE */
+
+function renderizarCliente(){
+
+const div =
+document.getElementById("clienteMenu");
+
+div.innerHTML = "";
+
+["Bebidas","Tira Gostos","Jantar"]
+.forEach(cat=>{
+
+const itens =
+cardapio.filter(i=>i.categoria===cat);
+
+if(itens.length){
+
+div.innerHTML += `
+<h2 style="
+margin:30px 0 20px;
+color:#4ade80;
+">
+${cat}
+</h2>
+
+<div class="menu-grid">
+
+${itens.map(item=>
+montarHTMLItem(item,"adicionarPedidoCliente")
+).join("")}
+
+</div>
+`;
+
+}
 
 });
 
 }
+
+/* GARÇOM */
+
+function renderizarGarcom(){
+
+const div =
+document.getElementById("menuGarcom");
+
+div.innerHTML = "";
+
+cardapio.forEach(item=>{
+
+div.innerHTML +=
+montarHTMLItem(item,"adicionarPedidoGarcom");
+
+});
+
+}
+
+/* PEDIDO CLIENTE */
 
 window.adicionarPedidoCliente = function(id){
 
 const item =
 cardapio.find(i=>i.firebaseId===id);
 
-const existente =
+const existe =
 pedidoCliente.find(i=>i.firebaseId===id);
 
-if(existente){
+if(existe){
 
-existente.quantidade++;
+existe.quantidade++;
 
 }else{
 
@@ -648,10 +691,10 @@ renderizarPedidoCliente();
 
 function renderizarPedidoCliente(){
 
-const pedidoDiv =
+const div =
 document.getElementById("pedidoCliente");
 
-pedidoDiv.innerHTML = "";
+div.innerHTML = "";
 
 let total = 0;
 
@@ -662,19 +705,16 @@ item.preco * item.quantidade;
 
 total += subtotal;
 
-pedidoDiv.innerHTML += `
+div.innerHTML += `
 
 <div class="order-item">
 
 <div style="
 display:flex;
 justify-content:space-between;
-margin-bottom:10px;
 ">
 
-<div>
-<strong>${item.nome}</strong>
-</div>
+<div>${item.nome}</div>
 
 <div>
 R$ ${subtotal.toFixed(2)}
@@ -682,32 +722,23 @@ R$ ${subtotal.toFixed(2)}
 
 </div>
 
-<div style="
-display:flex;
-gap:10px;
-">
+<div class="qtd-box">
 
-<button class="btn-remove"
-onclick="diminuirQuantidade(${index})">
-➖
+<button class="btn-red"
+onclick="diminuirQtdCliente(${index})">
+-
 </button>
 
-<div style="
-flex:1;
-text-align:center;
-padding:10px;
-background:#1e293b;
-border-radius:10px;
-">
+<div class="qtd-number">
 ${item.quantidade}
 </div>
 
-<button class="btn-add"
-onclick="aumentarQuantidade(${index})">
-➕
+<button class="btn-green"
+onclick="aumentarQtdCliente(${index})">
++
 </button>
 
-<button class="btn-remove"
+<button class="btn-red"
 onclick="removerItemCliente(${index})">
 🗑️
 </button>
@@ -726,15 +757,14 @@ document.getElementById("totalCliente")
 
 }
 
-window.aumentarQuantidade = function(index){
+window.aumentarQtdCliente = function(index){
 
 pedidoCliente[index].quantidade++;
-
 renderizarPedidoCliente();
 
 }
 
-window.diminuirQuantidade = function(index){
+window.diminuirQtdCliente = function(index){
 
 if(pedidoCliente[index].quantidade > 1){
 
@@ -753,40 +783,144 @@ renderizarPedidoCliente();
 window.removerItemCliente = function(index){
 
 pedidoCliente.splice(index,1);
-
 renderizarPedidoCliente();
 
 }
 
-function carregarMesas(){
+/* PEDIDO GARÇOM */
 
-const selects = [
-document.getElementById("mesaSelecionada"),
-document.getElementById("mesaGarcom")
-];
+window.adicionarPedidoGarcom = function(id){
 
-selects.forEach(select=>{
+const item =
+cardapio.find(i=>i.firebaseId===id);
 
-select.innerHTML = "";
+const existe =
+pedidoGarcom.find(i=>i.firebaseId===id);
 
-for(let i=1;i<=50;i++){
+if(existe){
 
-select.innerHTML += `
-<option value="${i}">
-Mesa ${i}
-</option>
-`;
+existe.quantidade++;
 
-}
+}else{
 
+pedidoGarcom.push({
+...item,
+quantidade:1
 });
 
 }
 
+renderizarPedidoGarcom();
+
+}
+
+function renderizarPedidoGarcom(){
+
+const div =
+document.getElementById("pedidoGarcom");
+
+div.innerHTML = "";
+
+let total = 0;
+
+pedidoGarcom.forEach((item,index)=>{
+
+const subtotal =
+item.preco * item.quantidade;
+
+total += subtotal;
+
+div.innerHTML += `
+
+<div class="order-item">
+
+<div style="
+display:flex;
+justify-content:space-between;
+">
+
+<div>${item.nome}</div>
+
+<div>
+R$ ${subtotal.toFixed(2)}
+</div>
+
+</div>
+
+<div class="qtd-box">
+
+<button class="btn-red"
+onclick="diminuirQtdGarcom(${index})">
+-
+</button>
+
+<div class="qtd-number">
+${item.quantidade}
+</div>
+
+<button class="btn-green"
+onclick="aumentarQtdGarcom(${index})">
++
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("totalGarcom")
+.innerHTML =
+"Total: R$ " + total.toFixed(2);
+
+}
+
+window.aumentarQtdGarcom = function(index){
+
+pedidoGarcom[index].quantidade++;
+renderizarPedidoGarcom();
+
+}
+
+window.diminuirQtdGarcom = function(index){
+
+if(pedidoGarcom[index].quantidade > 1){
+
+pedidoGarcom[index].quantidade--;
+
+}else{
+
+pedidoGarcom.splice(index,1);
+
+}
+
+renderizarPedidoGarcom();
+
+}
+
+/* ENVIAR PEDIDOS */
+
 window.enviarPedidoCliente = async function(){
 
 const mesa =
-document.getElementById("mesaSelecionada").value;
+new URLSearchParams(window.location.search)
+.get("mesa");
+
+if(!mesa){
+
+alert("Mesa inválida");
+return;
+
+}
+
+if(pedidoCliente.length===0){
+
+alert("Adicione itens");
+return;
+
+}
 
 let total = 0;
 
@@ -794,64 +928,428 @@ pedidoCliente.forEach(item=>{
 total += item.preco * item.quantidade;
 });
 
-await addDoc(collection(db,"pedidos"),{
-
+await addDoc(
+collection(db,"pedidos"),
+{
 mesa,
 itens:pedidoCliente,
 total,
-status:"pendente"
+status:"pendente",
+origem:"cliente",
+data:new Date().toLocaleString()
+}
+);
 
-});
+alert("Pedido enviado!");
 
 pedidoCliente = [];
 
 renderizarPedidoCliente();
 
-alert("Pedido enviado!");
+}
+
+window.enviarPedidoGarcom = async function(){
+
+const mesa =
+document.getElementById("mesaGarcom").value;
+
+if(!mesa){
+
+alert("Selecione uma mesa");
+return;
 
 }
 
-window.gerarQRCodes = function(){
+if(pedidoGarcom.length===0){
 
-const quantidade =
-parseInt(
-document.getElementById("quantidadeMesas").value
+alert("Adicione itens");
+return;
+
+}
+
+let total = 0;
+
+pedidoGarcom.forEach(item=>{
+total += item.preco * item.quantidade;
+});
+
+await addDoc(
+collection(db,"pedidos"),
+{
+mesa,
+itens:pedidoGarcom,
+total,
+status:"pendente",
+origem:"garcom",
+data:new Date().toLocaleString()
+}
 );
+
+alert("Pedido enviado!");
+
+pedidoGarcom = [];
+
+renderizarPedidoGarcom();
+
+}
+
+/* PEDIDOS ADMIN */
+
+function carregarPedidos(){
+
+onSnapshot(
+collection(db,"pedidos"),
+(snapshot)=>{
+
+const lista =
+document.getElementById("listaPedidos");
+
+lista.innerHTML = "";
+
+snapshot.forEach(docItem=>{
+
+const pedido =
+docItem.data();
+
+lista.innerHTML += `
+
+<div class="admin-pedido">
+
+<h3>
+🍽️ Mesa ${pedido.mesa}
+</h3>
+
+<p>
+${pedido.origem}
+</p>
+
+<div class="status ${pedido.status}">
+${pedido.status}
+</div>
+
+<div class="total">
+R$ ${pedido.total.toFixed(2)}
+</div>
+
+<button class="btn-green"
+style="width:100%;margin-top:10px;"
+onclick="marcarEntregue('${docItem.id}')">
+✅ Entregue
+</button>
+
+<button class="btn-primary"
+style="width:100%;margin-top:10px;"
+onclick="imprimirNota('${docItem.id}')">
+🧾 Nota Fiscal
+</button>
+
+<button class="btn-red"
+style="width:100%;margin-top:10px;"
+onclick="excluirPedido('${docItem.id}')">
+🗑️ Excluir
+</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+window.marcarEntregue = async function(id){
+
+await updateDoc(
+doc(db,"pedidos",id),
+{
+status:"entregue"
+}
+);
+
+}
+
+window.excluirPedido = async function(id){
+
+await deleteDoc(
+doc(db,"pedidos",id)
+);
+
+}
+
+/* NOTA */
+
+window.imprimirNota = async function(id){
+
+const pedidoDoc =
+await getDoc(doc(db,"pedidos",id));
+
+const pedido =
+pedidoDoc.data();
+
+let itens = "";
+
+pedido.itens.forEach(item=>{
+
+itens += `
+<tr>
+<td>${item.nome}</td>
+<td>${item.quantidade}</td>
+<td>
+R$ ${(item.preco*item.quantidade).toFixed(2)}
+</td>
+</tr>
+`;
+
+});
+
+const janela =
+window.open("","_blank","width=500,height=700");
+
+janela.document.write(`
+
+<html>
+
+<head>
+
+<title>Nota</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+td{
+padding:8px;
+border-bottom:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>GARÇOM PRO</h2>
+
+<p>
+Mesa ${pedido.mesa}
+</p>
+
+<p>
+${pedido.data}
+</p>
+
+<table>
+
+${itens}
+
+</table>
+
+<h3>
+TOTAL:
+R$ ${pedido.total.toFixed(2)}
+</h3>
+
+<button onclick="window.print();">
+🖨️ Imprimir
+</button>
+
+</body>
+
+</html>
+
+`);
+
+}
+
+/* QR CODES */
+
+window.criarQRCodeMesa = async function(){
+
+const mesa =
+document.getElementById("numeroMesa").value;
+
+if(!mesa){
+
+alert("Digite a mesa");
+return;
+
+}
+
+await setDoc(
+doc(db,"qrcodes",mesa),
+{
+mesa
+}
+);
+
+renderizarQRCodes();
+
+}
+
+async function renderizarQRCodes(){
 
 const qrGrid =
 document.getElementById("qrGrid");
 
-for(let i=1;i<=quantidade;i++){
+qrGrid.innerHTML = "";
 
-if(document.getElementById("qrMesa"+i)){
-continue;
-}
+const snap =
+await getDocs(collection(db,"qrcodes"));
 
-const div = document.createElement("div");
+snap.forEach(docItem=>{
 
-div.className = "qr-card";
+const mesa = docItem.id;
 
-div.innerHTML = `
+const qrId = "qr_"+mesa;
 
-<h3>Mesa ${i}</h3>
+const url =
+window.location.origin +
+window.location.pathname +
+"?cliente=true&mesa="+mesa;
 
-<div id="qrMesa${i}" class="qrcode"></div>
+qrGrid.innerHTML += `
+
+<div class="qr-card">
+
+<h3>
+Mesa ${mesa}
+</h3>
+
+<div class="qrcode"
+id="${qrId}">
+</div>
+
+<button class="btn-primary"
+style="margin-top:15px;width:100%;"
+onclick="imprimirQR('${mesa}')">
+🖨️ Imprimir
+</button>
+
+<button class="btn-red"
+style="margin-top:10px;width:100%;"
+onclick="apagarQR('${mesa}')">
+🗑️ Apagar
+</button>
+
+</div>
 
 `;
 
-qrGrid.appendChild(div);
+setTimeout(()=>{
 
-new QRCode(
-document.getElementById("qrMesa"+i),
-{
-text:
-window.location.origin +
-window.location.pathname +
-"?cliente=true&mesa=" + i,
+const qrElement =
+document.getElementById(qrId);
+
+if(qrElement){
+
+qrElement.innerHTML = "";
+
+new QRCode(qrElement,{
+text:url,
 width:180,
 height:180
+});
+
 }
+
+},100);
+
+});
+
+}
+
+window.apagarQR = async function(mesa){
+
+await deleteDoc(
+doc(db,"qrcodes",mesa)
 );
+
+renderizarQRCodes();
+
+}
+
+window.imprimirQR = function(mesa){
+
+const canvas =
+document.querySelector(
+"#qr_"+mesa+" canvas"
+);
+
+if(!canvas){
+
+alert("QR Code não encontrado");
+return;
+
+}
+
+const img =
+canvas.toDataURL("image/png");
+
+const janela =
+window.open("","_blank","width=500,height=700");
+
+janela.document.write(`
+
+<html>
+
+<body style="
+font-family:Arial;
+text-align:center;
+padding:30px;
+">
+
+<h1>
+Mesa ${mesa}
+</h1>
+
+<img src="${img}">
+
+<script>
+window.print();
+</script>
+
+</body>
+
+</html>
+
+`);
+
+}
+
+/* MESAS */
+
+function carregarMesas(){
+
+const select =
+document.getElementById("mesaGarcom");
+
+select.innerHTML =
+`<option value="">Selecione a mesa</option>`;
+
+for(let i=1;i<=30;i++){
+
+select.innerHTML += `
+<option value="${i}">
+Mesa ${i}
+</option>
+`;
 
 }
 
@@ -862,55 +1360,29 @@ height:180
 const params =
 new URLSearchParams(window.location.search);
 
-const modoCliente =
-params.get("cliente");
+if(params.get("cliente")==="true"){
 
-const mesaQR =
-params.get("mesa");
-
-if(modoCliente==="true"){
-
-document.querySelector(".tabs")
-.style.display="none";
-
-document.getElementById("admin")
-.style.display="none";
-
-document.getElementById("garcom")
-.style.display="none";
-
-document.getElementById("qr")
-.style.display="none";
+document.getElementById("tabsSistema")
+.style.display = "none";
 
 document.querySelectorAll(".tab-content")
-.forEach(tab=>{
-tab.classList.remove("active");
-});
-
-document.getElementById("cliente")
-.style.display="block";
+.forEach(tab=>tab.classList.remove("active"));
 
 document.getElementById("cliente")
 .classList.add("active");
 
-document.querySelector("header h1")
-.innerHTML="📱 Cardápio Digital";
-
-if(mesaQR){
-
-document.getElementById("mesaSelecionada")
-.value = mesaQR;
-
-document.getElementById("mesaClienteInfo")
+document.getElementById("mesaInfo")
 .innerHTML =
-"🍽️ Mesa " + mesaQR;
+"🍽️ Mesa " + params.get("mesa");
 
 }
 
-}
+/* INICIAR */
 
 carregarProdutos();
+carregarPedidos();
 carregarMesas();
+renderizarQRCodes();
 
 </script>
 
