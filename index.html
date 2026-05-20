@@ -122,6 +122,14 @@ margin-top:10px;
 <h1>🍽️ GarçomPro Firebase</h1>
 </header>
 
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+<button onclick="abrirAba('admin')">⚙️ Admin</button>
+<button onclick="abrirAba('garcom')">🍽️ Garçom</button>
+<button onclick="abrirAba('cliente')">📱 Cliente</button>
+<button onclick="abrirAba('qr')">🔳 QR Codes</button>
+</div>
+
+<div id="admin" class="aba">
 <div class="card">
 <h2>➕ Adicionar Produto</h2>
 <input type="text" id="nome" placeholder="Nome do produto">
@@ -131,11 +139,24 @@ margin-top:10px;
 <button onclick="adicionarProduto()">Salvar Produto</button>
 </div>
 
+</div>
+
+<div id="garcom" class="aba" style="display:none;">
 <div class="card">
 <h2>📱 Cardápio</h2>
 <div class="menu-grid" id="menu"></div>
 </div>
 
+</div>
+
+<div id="cliente" class="aba" style="display:none;">
+<div class="card">
+<h2>📱 Área do Cliente</h2>
+<p>O cliente verá apenas o cardápio digital ao acessar pelo QR Code.</p>
+</div>
+</div>
+
+<div id="qr" class="aba" style="display:none;">
 <div class="card">
 <h2>🔳 QR Codes das Mesas</h2>
 <input type="number" id="quantidadeMesas" placeholder="Quantidade de mesas">
@@ -301,6 +322,18 @@ document.getElementById('status'+numero).innerHTML = '🟢 Livre';
 document.getElementById('status'+numero).className = 'statusLivre';
 }
 
+window.abrirAba = function(id){
+
+const abas = document.querySelectorAll('.aba');
+abas.forEach(aba=>aba.style.display='none');
+
+const abaAtual = document.getElementById(id);
+
+if(abaAtual){
+abaAtual.style.display='block';
+}
+}
+
 window.imprimirQR = function(numero){
 
 const canvas = document.querySelector('#qr'+numero+' canvas');
@@ -327,6 +360,29 @@ window.print();
 `);
 
 janela.document.close();
+}
+
+const params = new URLSearchParams(window.location.search);
+const modoCliente = params.get('cliente');
+
+if(modoCliente === 'true'){
+
+const abas = document.querySelectorAll('.aba');
+abas.forEach(aba=>aba.style.display='none');
+
+const cliente = document.getElementById('cliente');
+cliente.style.display='block';
+
+const botoes = document.querySelectorAll('button');
+
+botoes.forEach(btn=>{
+if(btn.innerText.includes('Admin') || btn.innerText.includes('Garçom') || btn.innerText.includes('QR')){
+btn.style.display='none';
+}
+});
+
+}else{
+abrirAba('admin');
 }
 
 try{
