@@ -603,9 +603,14 @@ await deleteDoc(doc(db,'pedidos',id));
 }
 }
 
-window.gerarQRCodes = function(){
+window.gerarQRCodes = async function(){
 
 const quantidade = parseInt(document.getElementById('quantidadeMesas').value);
+
+if(!quantidade || quantidade < 1){
+alert('Informe a quantidade de mesas');
+return;
+}
 
 const qrGrid = document.getElementById('qrGrid');
 
@@ -613,29 +618,104 @@ const baseURL = window.location.origin + window.location.pathname + '?cliente=tr
 
 for(let i=1;i<=quantidade;i++){
 
-if(document.getElementById('cardMesa'+i)){
+const mesaId = 'mesa_'+i;
+
+const existe = document.getElementById(mesaId);
+
+if(existe){
 continue;
 }
 
-const qrId = 'qrMesa'+i;
+const card = document.createElement('div');
+card.className = 'qr-card';
+card.id = mesaId;
 
-qrGrid.innerHTML += `
-<div class="qr-card" id="cardMesa${i}">
-<h3>Mesa ${i}</h3>
-<div id="${qrId}" class="qrcode"></div>
+card.innerHTML = `
+<h3>🍽️ Mesa ${i}</h3>
+
+<div id="qrMesa${i}" class="qrcode"></div>
+
+<div id="statusMesa${i}" class="status livre">
+🟢 LIVRE
+</div>
 
 <div style="margin-top:15px;display:flex;flex-direction:column;gap:10px;">
-<button class="btn-primary" onclick="imprimirQRCode(${i})">🖨️ Imprimir</button>
-<button class="btn-red" onclick="apagarQRCode(${i})">🗑️ Apagar QR</button>
-</div>
+
+<button class="btn-primary" onclick="imprimirQRCode(${i})">
+🖨️ Imprimir QR Code
+</button>
+
+<button class="btn-orange" onclick="alternarMesa(${i})">
+🔄 Livre / Ocupada
+</button>
+
+<button class="btn-red" onclick="apagarQRCode(${i})">
+🗑️ Excluir QR
+</button>
+
 </div>
 `;
 
-new QRCode(document.getElementById(qrId),{
+qrGrid.appendChild(card);
+
+new QRCode(document.getElementById('qrMesa'+i),{
 text: baseURL + '&mesa=' + i,
 width:180,
 height:180
 });
+
+const mesaRef = doc(db,'mesas',String(i));
+const mesaSnap = await getDoc(mesaRef);
+
+if(!mesaSnap.exists()){
+await setDoc(mesaRef,{
+status:'livre'
+});
+}
+
+atualizarStatusMesa(i);
+}
+}
+
+window.alternarMesa = async function(mesa){
+
+const mesaRef = doc(db,'mesas',String(mesa));
+const mesaSnap = await getDoc(mesaRef);
+
+let novoStatus = 'ocupada';
+
+if(mesaSnap.exists()){
+const dados = mesaSnap.data();
+novoStatus = dados.status === 'ocupada' ? 'livre' : 'ocupada';
+}
+
+await setDoc(mesaRef,{
+status:novoStatus
+});
+
+atualizarStatusMesa(mesa);
+mostrarStatusMesas();
+}
+
+async function atualizarStatusMesa(mesa){
+
+const mesaRef = doc(db,'mesas',String(mesa));
+const mesaSnap = await getDoc(mesaRef);
+
+const statusDiv = document.getElementById('statusMesa'+mesa);
+
+if(!statusDiv || !mesaSnap.exists()){
+return;
+}
+
+const dados = mesaSnap.data();
+
+if(dados.status === 'ocupada'){
+statusDiv.className = 'status ocupada';
+statusDiv.innerHTML = '🔴 OCUPADA';
+}else{
+statusDiv.className = 'status livre';
+statusDiv.innerHTML = '🟢 LIVRE';
 }
 }
 
